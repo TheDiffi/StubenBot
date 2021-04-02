@@ -13,11 +13,11 @@ public class Main {
     public static TreeMap<String, Sticker> registeredStickers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
     public static void main(String[] args) throws Exception {
-
+        
         bootup();
 
         // loads the Bot api
-        client = DiscordClientBuilder.create("NzgzNzg2NzU4MzgyMTU3ODQ1.X8f0TQ.zh_TiHotXUnmsq_qEaqzK7YAzuM").build();
+        client = DiscordClientBuilder.create("ODI3NjEyODE1OTU4NjA1ODM0.YGdkfw.FKIcLd9_YFfLKaKUV0bo4_k4bXM").build();
 
         // looks at every message and calls "handleCommands"
         client.getEventDispatcher().on(MessageCreateEvent.class)

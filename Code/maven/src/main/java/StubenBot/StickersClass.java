@@ -20,6 +20,7 @@ public class StickersClass {
 
     private static final String stickerJsonFilepath = "stickers\\stickers.json";
 
+
     public static void stickerEvent(MessageCreateEvent event) {
         var eventChannel = event.getMessage().getChannel().block();
         String messageContent = event.getMessage().getContent().orElse("");
