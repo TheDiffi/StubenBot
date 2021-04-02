@@ -18,7 +18,8 @@ import discord4j.core.object.entity.MessageChannel;
 
 public class StickersClass {
 
-    private static final String stickerJsonFilepath = "stickers\\stickers.json";
+    private static final String stickerJsonFilepath = "stickers/stickers.json";
+    private static final String stickerJsonFilepathBackup = "stickers/stickersBackup.json";
 
     public static void stickerEvent(MessageCreateEvent event) {
         var eventChannel = event.getMessage().getChannel().block();
@@ -188,7 +189,7 @@ public class StickersClass {
     private static void backupStickers(JsonObject stickers) {
 
         try {
-            BufferedWriter failsaveWriter = Files.newBufferedWriter(Paths.get("stickers\\stickersBackup.json"));
+            BufferedWriter failsaveWriter = Files.newBufferedWriter(Paths.get(stickerJsonFilepathBackup));
             Jsoner.serialize(stickers, failsaveWriter);
             failsaveWriter.close();
         } catch (IOException e) {
