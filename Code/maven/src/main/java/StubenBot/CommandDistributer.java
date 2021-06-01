@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.awt.Color;
 
 import StubenBot.EngeleBengele.EngeleBengele;
 import StubenBot.SportTracker.SportTracker;
@@ -17,14 +18,17 @@ public class CommandDistributer {
     public static final String stickerpref = Main.stickerpref;
     public static ArrayList<Message> toDelete = new ArrayList<>();
 
+    private static boolean russianGrammar = false;
+
     public static void handleCommands(MessageCreateEvent event) {
         if (event.getMessage().getContent().isPresent()) {
             deleteOldMessages();
 
             test();
 
+            // tests if message starts with prefix
             if (event.getMessage().getContent().get().startsWith(prefix)) {
-                complexEvent(event);
+                complexCommand(event);
             } else if (event.getMessage().getContent().get().startsWith(stickerpref)) {
                 StickersClass.stickerEvent(event);
             } else {
@@ -34,6 +38,7 @@ public class CommandDistributer {
         }
     }
 
+    // deletes messages whitch have been put in the delete queue
     private static void deleteOldMessages() {
         for (Message msgObj : toDelete) {
             msgObj.delete().block();
@@ -41,17 +46,13 @@ public class CommandDistributer {
         toDelete.clear();
     }
 
-    private static void complexEvent(MessageCreateEvent event) {
+    // overcomplicated, just use quickCommands
+    private static void complexCommand(MessageCreateEvent event) {
         var eventChannel = event.getMessage().getChannel().block();
         String messageContent = event.getMessage().getContent().orElse("");
         List<String> messagePieces = new LinkedList<>(Arrays.asList(messageContent.split(" ")));
         var messagePrefix = messagePieces.remove(0);
         var command = messagePrefix.substring(1);
-
-        // TODO: Save Stube/general & read into main channel
-        /*
-         * if (eventChannel == null) { eventChannel = mainChannel; }
-         */
 
         if (messagePrefix.equalsIgnoreCase(prefix + "EB")) {
             EngeleBengele.handleCommand(event, command, messagePieces, eventChannel);
@@ -63,7 +64,7 @@ public class CommandDistributer {
         }
 
         else {
-            generalCommands(event, command, messagePieces, eventChannel);
+            quickCommands(event, command, messagePieces, eventChannel);
         }
 
         // found überprüft ob der Command irgentwo gefunden wurde
@@ -73,30 +74,66 @@ public class CommandDistributer {
          */
     }
 
-    private static void generalCommands(MessageCreateEvent event, String command, List<String> messagePieces,
+    private static void quickCommands(MessageCreateEvent event, String command, List<String> messagePieces,
             MessageChannel eventChannel) {
         switch (command) {
-        case "addSticker":
-            StickersClass.addStickerEvent(event, messagePieces, eventChannel);
-            break;
-        case "deleteSticker":
-            StickersClass.deleteSticker(event, messagePieces, eventChannel);
-            break;
-        case "removeSticker":
-            StickersClass.deleteSticker(event, messagePieces, eventChannel);
-            break;
-        case "help":
-            eventChannel.createMessage("Coming soon").block();
-            //TODO: inplement design from wwbot
-            break;
-        case "commands":
-            eventChannel.createMessage("Not available yet").block();
+            case "ping":
+            case "Ping":
+                eventChannel.createMessage("Pong!").block();
+                break;
+            case "help":
+                sendHelpMessage(event, eventChannel);
+                break;
+            case "commands":
+                sendCommandsMessage(event, eventChannel);
+                break;
 
-            break;
-        default:
+            case "toggleRussianGrammar":
+                toggleRussianGrammar(event, eventChannel);
+                break;
+
+            case "addSticker":
+                StickersClass.addStickerEvent(event, messagePieces, eventChannel);
+                break;
+            case "deleteSticker":
+            case "removeSticker":
+                StickersClass.deleteSticker(event, messagePieces, eventChannel);
+                break;
+
+            default:
 
         }
 
+    }
+
+    private static void sendHelpMessage(MessageCreateEvent event, MessageChannel channel) {
+        Globals.createEmbed(channel, Color.BLACK, "Type " + prefix + "commands to view all commands", "");
+    }
+
+    private static void sendCommandsMessage(MessageCreateEvent event, MessageChannel channel) {
+        String mssg = " ---- Sticker ---- ";
+        mssg += buildCommandDescription(". ", "", "Listet alle Sticker");
+        mssg += buildCommandDescription(".", "<stickername>", "Sendet jenen Sticker");
+
+        mssg += "\n ---- Engele Bengele ---- ";
+        mssg += buildCommandDescription(prefix, "EB join <name>", "Trete dem Spiel bei");
+        mssg += buildCommandDescription(prefix, "EB remove <name>", "Entferne einen Spieler");
+        mssg += buildCommandDescription(prefix, "EB start", "Starte die zufällige Verteilung!");
+        mssg += " \n---- General ---- ";
+        mssg += "\nWenn du a coole Idee für a Funktion fürn bot hosch, feel free es oanem von die Mods weiterzuleiten!";
+
+        Globals.createEmbed(channel, Color.BLACK, "", mssg);
+    }
+
+    public static String buildCommandDescription(String pref, String command, String description) {
+        return "\n" + "`" + pref + command + ":` " + description;
+    }
+
+    private static void toggleRussianGrammar(MessageCreateEvent event, MessageChannel channel) {
+        if (event.getMessage().getAuthor().get().getId().asString().equals("317716883077988354")) {
+            russianGrammar = !russianGrammar;
+            channel.createMessage("`RUSSIAN GRAMMAR: " + russianGrammar + "`").block();
+        }
     }
 
     private static void reaction(MessageCreateEvent event) {
@@ -149,60 +186,71 @@ public class CommandDistributer {
                         .block();
             }
 
-            if (event.getMessage().getChannelId().asString().equals("788081498136772669")
-                    && (content.indexOf("I ") != -1 || content.indexOf("I'") != -1)) {
+            if (russianGrammar || event.getMessage().getChannelId().asString().equals("788081498136772669")) {
+                if (content.indexOf("I ") != -1 || content.indexOf("I'") != -1) {
+                    russianCorrection(event, content);
 
-                event.getMessage().getChannel().block().createMessage(spec -> {
-                    var mssg = "> ..." + content.substring(content.indexOf("I") / 2);
-                    var youmeanttosay = content.substring(content.indexOf("I"), content.length());
-                    while (youmeanttosay.indexOf("me") != -1 || youmeanttosay.indexOf("mine") != -1
-                            || youmeanttosay.indexOf("my") != -1 || youmeanttosay.indexOf("I") != -1
-                            || youmeanttosay.indexOf("am") != -1) {
-                        if (youmeanttosay.indexOf("me") != -1) {
-                            youmeanttosay = youmeanttosay.replaceAll("me", "us");
-                        }
-                        if (youmeanttosay.indexOf("mine") != -1) {
-                            youmeanttosay = youmeanttosay.replaceAll("mine", "ours");
-                        }
-                        if (youmeanttosay.indexOf("my") != -1) {
-                            youmeanttosay = youmeanttosay.replaceAll("my", "our");
-                        }
-                        if (youmeanttosay.indexOf("I") != -1) {
-                            youmeanttosay = youmeanttosay.replace("I", "WE");
-                        }
-                        if (youmeanttosay.indexOf("i") != -1) {
-                            youmeanttosay = youmeanttosay.replace(" i ", " we ");
-                        }
-                        if (youmeanttosay.indexOf("am") != -1) {
-                            youmeanttosay = youmeanttosay.replace("am", "are");
-                        }
-                        if (youmeanttosay.indexOf("'m") != -1) {
-                            youmeanttosay = youmeanttosay.replace("'m", "'re");
-                        }
-                        if (youmeanttosay.indexOf("bin") != -1) {
-                            youmeanttosay = youmeanttosay.replace("bin", "are");
-                        }
-                    }
-                    mssg += "\nI think you meant to say: " + youmeanttosay;
+                } else if (event.getMessage().getContent().get().indexOf("idk") != -1
+                        || event.getMessage().getContent().get().indexOf("Idk") != -1
+                        || event.getMessage().getContent().get().indexOf("IDK") != -1) {
+                    // event.getMessage().delete().block();
+                    event.getMessage().getChannel().block()
+                            .createMessage(event.getMember().get().getMention() + " **WE** don't know").block();
 
-                    spec.setContent(mssg);
-                    /*
-                     * spec.setEmbed(b -> { b.setImage("https://i.imgur.com/8doX74q.jpg");
-                     * 
-                     * });
-                     */
-                }).block();
+                } else if (event.getMessage().getContent().get().indexOf("idc") != -1
+                        || event.getMessage().getContent().get().indexOf("Idc") != -1
+                        || event.getMessage().getContent().get().indexOf("IDC") != -1) {
+                    // event.getMessage().delete().block();
+                    event.getMessage().getChannel().block()
+                            .createMessage(event.getMember().get().getMention() + " **WE** don't care").block();
 
-            } else if (event.getMessage().getContent().get().indexOf("idk") != -1) {
-                event.getMessage().delete().block();
-                event.getMessage().getChannel().block()
-                        .createMessage(event.getMember().get().getMention() + " **WE** don't know").block();
-            } else if (event.getMessage().getContent().get().indexOf("idc") != -1) {
-                event.getMessage().delete().block();
-                event.getMessage().getChannel().block()
-                        .createMessage(event.getMember().get().getMention() + " **WE** don't care").block();
+                }
             }
+
         }
+    }
+
+    private static void russianCorrection(MessageCreateEvent event, String content) {
+        event.getMessage().getChannel().block().createMessage(spec -> {
+            var mssg = "> ..." + content.substring(content.indexOf("I") / 2);
+            var youmeanttosay = content.substring(content.indexOf("I"), content.length());
+            while (youmeanttosay.indexOf("me") != -1 || youmeanttosay.indexOf("mine") != -1
+                    || youmeanttosay.indexOf("my") != -1 || youmeanttosay.indexOf("I") != -1
+                    || youmeanttosay.indexOf("am") != -1) {
+                if (youmeanttosay.indexOf("me") != -1) {
+                    youmeanttosay = youmeanttosay.replaceAll("me", "us");
+                }
+                if (youmeanttosay.indexOf("mine") != -1) {
+                    youmeanttosay = youmeanttosay.replaceAll("mine", "ours");
+                }
+                if (youmeanttosay.indexOf("my") != -1) {
+                    youmeanttosay = youmeanttosay.replaceAll("my", "our");
+                }
+                if (youmeanttosay.indexOf("I") != -1) {
+                    youmeanttosay = youmeanttosay.replace("I", "WE");
+                }
+                if (youmeanttosay.indexOf("i") != -1) {
+                    youmeanttosay = youmeanttosay.replace(" i ", " we ");
+                }
+                if (youmeanttosay.indexOf("am") != -1) {
+                    youmeanttosay = youmeanttosay.replace("am", "are");
+                }
+                if (youmeanttosay.indexOf("'m") != -1) {
+                    youmeanttosay = youmeanttosay.replace("'m", "'re");
+                }
+                if (youmeanttosay.indexOf("bin") != -1) {
+                    youmeanttosay = youmeanttosay.replace("bin", "are");
+                }
+            }
+            mssg += "\nI think you meant to say: " + youmeanttosay;
+
+            spec.setContent(mssg);
+            /*
+             * spec.setEmbed(b -> { b.setImage("https://i.imgur.com/8doX74q.jpg");
+             * 
+             * });
+             */
+        }).block();
     }
 
     private static void test() {

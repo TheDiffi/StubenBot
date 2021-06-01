@@ -1,5 +1,6 @@
 package StubenBot;
 
+import java.awt.Color;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Reader;
@@ -18,8 +19,18 @@ import discord4j.core.object.entity.MessageChannel;
 
 public class StickersClass {
 
-    private static final String stickerJsonFilepath = "stickers\\stickers.json";
+    private static String stickerJsonFilepath = "stickers/stickers.json";
 
+    private static final int distance = 20;
+
+    public static void determineOS() {
+        String os = System.getProperty("os.name");
+        System.out.println("Starting on: " + os);
+        if (os.startsWith("Windows")) {
+            stickerJsonFilepath = "stickers\\stickers.json";
+        }
+
+    }
 
     public static void stickerEvent(MessageCreateEvent event) {
         var eventChannel = event.getMessage().getChannel().block();
@@ -28,23 +39,41 @@ public class StickersClass {
 
         // sends a list of all available stickers
         if (messageContent.equals(".")) {
-            CommandDistributer.toDelete.add(eventChannel.createMessage("**All Stickers:**\n").block());
-            var msg = "";
+            var msg = "**All Stickers:**\n";
+            int i = 1;
             for (Sticker sticker : Main.registeredStickers.values()) {
-                msg += "." + sticker.name + "\n";
-                // CommandDistributer.toDelete.add(eventChannel.createMessage(sticker.name +
-                // "\n" + sticker.url + "\n").block());
-   
+                msg += "." + sticker.name;
+
+                if (i % 2 == 1) {
+                    int spaces = distance - sticker.name.length();
+                    for (int j = 0; j < spaces; j += 1) {
+                        msg += "  ";
+                    }
+                    if (spaces <= 0) {
+                        msg += "-";
+                    }
+                } else {
+                    msg += "\n";
+                }
+
+                i++;
+
             }
             CommandDistributer.toDelete.add(eventChannel.createMessage(msg).block());
+
             if (event.getGuildId().isPresent()) {
                 CommandDistributer.toDelete.add(event.getMessage());
             }
 
         } else if (messageContent.equals(".help")) {
-            CommandDistributer.toDelete.add(eventChannel.createMessage(
-                    "**.<stickername>**   to send sticker\n**.**   to list all stickers\n**%addSticker <name> <url>   to add Stickers\n")
-                    .block());
+            String mssg = " ---- Sticker ---- ";
+            mssg += buildCommandDescription(". ", "Listet alle Sticker");
+            mssg += buildCommandDescription(".<stickername>", "Sendet jenen Sticker");
+            if (event.getMessage().getAuthor().get().getId().asString().equals("317716883077988354")) {
+                mssg += buildCommandDescription("%addSticker <name> <url>", "füge einen Sticker hinzu");
+            }
+            CommandDistributer.toDelete
+                    .add(Globals.createEmbed(event.getMessage().getChannel().block(), Color.LIGHT_GRAY, "", mssg));
 
         }
         // if the stickername is registered, it gets send
@@ -61,12 +90,14 @@ public class StickersClass {
 
         // deletes the users message
 
+        /*
+         * if (event.getGuildId().isPresent()) { event.getMessage().delete().block(); }
+         */
 
+    }
 
-        /* if (event.getGuildId().isPresent()) {
-            event.getMessage().delete().block();
-        } */
-
+    public static String buildCommandDescription(String command, String description) {
+        return "\n" + "`" + command + ":` " + description;
     }
 
     public static void reloadStickers() {
@@ -112,7 +143,6 @@ public class StickersClass {
             sticker.put("name", newSticker.name);
             sticker.put("url", newSticker.url);
             stickerArray.add(sticker);
-
 
             // puts the array in the stickers object
             JsonObject stickerObject = new JsonObject();
@@ -210,20 +240,25 @@ public class StickersClass {
 
     public static void addStickerEvent(MessageCreateEvent event, List<String> messagePieces,
             MessageChannel eventChannel) {
-        if (messagePieces.size() >= 2 && messagePieces.get(1).startsWith("http")) {
-            Sticker newSticker = new Sticker(messagePieces.get(0), messagePieces.get(1));
-            var succsses = addSticker(newSticker);
+        if (messagePieces.size() >= 2) {
+            if (messagePieces.get(1).startsWith("http")) {
+                Sticker newSticker = new Sticker(messagePieces.get(0), messagePieces.get(1));
+                var succsses = addSticker(newSticker);
 
-            if (succsses) {
-                eventChannel.createMessage("Adding Sticker: " + event.getMember().get().getUsername() + "\nname: "
-                        + messagePieces.get(0) + "\nurl: " + messagePieces.get(1)).block();
-                // eventChannel.createMessage("Please confirm with **" + Main.prefix+ "confirm
-                // **").block();
+                if (succsses) {
+                    eventChannel.createMessage("Adding Sticker: " + event.getMember().get().getUsername() + "\nname: "
+                            + messagePieces.get(0) + "\nurl: " + messagePieces.get(1)).block();
+                    // eventChannel.createMessage("Please confirm with **" + Main.prefix+ "confirm
+                    // **").block();
 
+                } else {
+                    eventChannel.createMessage("Failed!").block();
+                }
             } else {
-                eventChannel.createMessage("Failed!").block();
+                Globals.createEmbed(eventChannel, Color.RED, "", "Unsuccsessful: No link detected!");
             }
         }
+
     }
 
     public static void deleteSticker(MessageCreateEvent event, List<String> messagePieces,

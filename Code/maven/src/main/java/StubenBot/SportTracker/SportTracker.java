@@ -9,6 +9,8 @@ public class SportTracker {
 
     public static void handleCommand(MessageCreateEvent event, String command, List<String> messageParameters,
             MessageChannel eventChannel) {
+        
+        command = messageParameters.remove(0);
 
         if (command.equalsIgnoreCase("test")) {
             eventChannel.createMessage("Sport in Progress").block();

@@ -17,6 +17,8 @@ public class Main {
         bootup();
 
         // loads the Bot api
+        //Main Bot: NzgzNzg2NzU4MzgyMTU3ODQ1.X8f0TQ.zh_TiHotXUnmsq_qEaqzK7YAzuM
+        //Test Bot: ODI3NjEyODE1OTU4NjA1ODM0.YGdkfw.FKIcLd9_YFfLKaKUV0bo4_k4bXM
         client = DiscordClientBuilder.create("ODI3NjEyODE1OTU4NjA1ODM0.YGdkfw.FKIcLd9_YFfLKaKUV0bo4_k4bXM").build();
 
         // looks at every message and calls "handleCommands"
@@ -26,11 +28,14 @@ public class Main {
                     try {
                         CommandDistributer.handleCommands(event);
                     } catch (Exception ex) {
+                        
                         ex.printStackTrace();
                         event.getMessage().getChannel().block()
                                 .createMessage(
-                                        "avoided critical Exception, pls don't repeat what u did *laughs in pain*")
+                                        "avoided critical Exception, pls don't repeat what u did *laughs in pain*" + 
+                                        "\n " + ex)
                                 .block();
+                        
                     }
                 });
         
@@ -41,8 +46,10 @@ public class Main {
     }
 
     public static void bootup() {
-
-       StickersClass.reloadStickers();
+        //reads stickers 
+        StickersClass.determineOS();
+        StickersClass.reloadStickers();
+        
 
     }
 
