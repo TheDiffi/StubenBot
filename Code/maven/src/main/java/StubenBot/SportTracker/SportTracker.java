@@ -1,7 +1,11 @@
 package StubenBot.SportTracker;
 
 import java.util.List;
+import java.awt.Color;
 
+import StubenBot.CommandDistributer;
+import StubenBot.Globals;
+import StubenBot.Main;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.MessageChannel;
 
@@ -14,6 +18,14 @@ public class SportTracker {
 
         if (command.equalsIgnoreCase("test")) {
             eventChannel.createMessage("Sport in Progress").block();
+            
+        }
+        if(command.equalsIgnoreCase("commands") || command.equalsIgnoreCase("help")){
+            var mssg = "\n ---- Engele Bengele ---- ";
+            mssg += CommandDistributer.buildCommandDescription(Main.prefix, "SP I_did_Sport", "Get your Reward ;)");
+            mssg += "\nThis feature is still very much work in progress... ";
+
+            Globals.createEmbed(eventChannel, Color.BLACK, "", mssg);
             
         }
         if (command.equalsIgnoreCase("I_did_Sport")) {

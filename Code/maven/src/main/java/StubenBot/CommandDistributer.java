@@ -82,8 +82,6 @@ public class CommandDistributer {
                 eventChannel.createMessage("Pong!").block();
                 break;
             case "help":
-                sendHelpMessage(event, eventChannel);
-                break;
             case "commands":
                 sendCommandsMessage(event, eventChannel);
                 break;
@@ -106,27 +104,24 @@ public class CommandDistributer {
 
     }
 
-    private static void sendHelpMessage(MessageCreateEvent event, MessageChannel channel) {
-        Globals.createEmbed(channel, Color.BLACK, "Type " + prefix + "commands to view all commands", "");
-    }
+    
 
     private static void sendCommandsMessage(MessageCreateEvent event, MessageChannel channel) {
         String mssg = " ---- Sticker ---- ";
         mssg += buildCommandDescription(". ", "", "Listet alle Sticker");
         mssg += buildCommandDescription(".", "<stickername>", "Sendet jenen Sticker");
 
-        mssg += "\n ---- Engele Bengele ---- ";
-        mssg += buildCommandDescription(prefix, "EB join <name>", "Trete dem Spiel bei");
-        mssg += buildCommandDescription(prefix, "EB remove <name>", "Entferne einen Spieler");
-        mssg += buildCommandDescription(prefix, "EB start", "Starte die zufällige Verteilung!");
         mssg += " \n---- General ---- ";
+        mssg += buildCommandDescription(prefix, "EB commands", "Engele Bengele!");
+        mssg += buildCommandDescription(prefix, "SP commands", "Sport Tracker");
+
         mssg += "\nWenn du a coole Idee für a Funktion fürn bot hosch, feel free es oanem von die Mods weiterzuleiten!";
 
         Globals.createEmbed(channel, Color.BLACK, "", mssg);
     }
 
     public static String buildCommandDescription(String pref, String command, String description) {
-        return "\n" + "`" + pref + command + ":` " + description;
+        return "\n" + "`" + pref + command + " :` " + description;
     }
 
     private static void toggleRussianGrammar(MessageCreateEvent event, MessageChannel channel) {
