@@ -17,9 +17,7 @@ public class Main {
         bootup();
 
         // loads the Bot api
-        //Main Bot: NzgzNzg2NzU4MzgyMTU3ODQ1.X8f0TQ.zh_TiHotXUnmsq_qEaqzK7YAzuM
-        //Test Bot: ODI3NjEyODE1OTU4NjA1ODM0.YGdkfw.FKIcLd9_YFfLKaKUV0bo4_k4bXM
-        client = DiscordClientBuilder.create("ODI3NjEyODE1OTU4NjA1ODM0.YGdkfw.FKIcLd9_YFfLKaKUV0bo4_k4bXM").build();
+        client = DiscordClientBuilder.create("Bot Token Here").build();
 
         // looks at every message and calls "handleCommands"
         client.getEventDispatcher().on(MessageCreateEvent.class)

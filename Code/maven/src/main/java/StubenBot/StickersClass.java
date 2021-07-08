@@ -59,6 +59,8 @@ public class StickersClass {
                 i++;
 
             }
+
+            // so it deletes after
             CommandDistributer.toDelete.add(eventChannel.createMessage(msg).block());
 
             if (event.getGuildId().isPresent()) {
@@ -72,8 +74,14 @@ public class StickersClass {
             if (event.getMessage().getAuthor().get().getId().asString().equals("317716883077988354")) {
                 mssg += buildCommandDescription("%addSticker <name> <url>", "füge einen Sticker hinzu");
             }
+
+            // so it deletes after
             CommandDistributer.toDelete
                     .add(Globals.createEmbed(event.getMessage().getChannel().block(), Color.LIGHT_GRAY, "", mssg));
+
+            if (event.getGuildId().isPresent()) {
+                CommandDistributer.toDelete.add(event.getMessage());
+            }
 
         }
         // if the stickername is registered, it gets send

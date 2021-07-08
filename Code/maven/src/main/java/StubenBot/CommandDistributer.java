@@ -110,6 +110,7 @@ public class CommandDistributer {
         String mssg = " ---- Sticker ---- ";
         mssg += buildCommandDescription(". ", "", "Listet alle Sticker");
         mssg += buildCommandDescription(".", "<stickername>", "Sendet jenen Sticker");
+        mssg += buildCommandDescription(".", "help", "Info & Commands");
 
         mssg += " \n---- General ---- ";
         mssg += buildCommandDescription(prefix, "EB commands", "Engele Bengele!");
