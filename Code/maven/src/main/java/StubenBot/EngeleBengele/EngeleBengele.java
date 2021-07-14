@@ -1,83 +1,81 @@
 package StubenBot.EngeleBengele;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.awt.Color;
 
 import StubenBot.CommandDistributer;
+import StubenBot.CommandProperties;
 import StubenBot.Globals;
 import StubenBot.Main;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Snowflake;
 
 public class EngeleBengele {
     public static HashMap<Snowflake, EBPlayer> mapJoined = new HashMap<>();
 
-    public static void handleCommand(MessageCreateEvent event, String command, List<String> messageParameters,
-            MessageChannel eventChannel) {
+    public static void handleCommand(MessageCreateEvent event, CommandProperties props) {
+  
+        //sets the command correctly
+        props.command = props.params.remove(0);
 
-        var author = event.getMessage().getAuthor().get();
-        command = messageParameters.remove(0);
 
-
-        if(command.equalsIgnoreCase("commands") || command.equalsIgnoreCase("help")){
+        if(props.command.equalsIgnoreCase("commands") || props.command.equalsIgnoreCase("help")){
             var mssg = "\n ---- Engele Bengele ---- ";
             mssg += CommandDistributer.buildCommandDescription(Main.prefix, "EB join <name>", "Trete dem Spiel bei");
             mssg += CommandDistributer.buildCommandDescription(Main.prefix, "EB remove <name>", "Entferne einen Spieler");
             mssg += CommandDistributer.buildCommandDescription(Main.prefix, "EB start", "Starte die zufällige Verteilung!");
 
-            Globals.createEmbed(eventChannel, Color.BLACK, "", mssg);
+            Globals.createEmbed(props.eventChannel, Color.BLACK, "", mssg);
         }
-        if (command.equalsIgnoreCase("join")) {
+        if (props.command.equalsIgnoreCase("join")) {
             // gets the name
             var name = "";
 
-            if (messageParameters.size() == 0) {
-                name = author.getUsername();
+            if (props.params.size() == 0) {
+                name = props.author.getUsername();
             } else {
-                for (String string : messageParameters) {
+                for (String string : props.params) {
                     name += string + " ";
                 }
             }
             // creates new bengele
-            var player = new EBPlayer(name, author);
+            var player = new EBPlayer(name, props.author);
 
             // fills map
-            if (mapJoined != null && !mapJoined.containsKey(author.getId())) {
-                mapJoined.put(author.getId(), player);
+            if (mapJoined != null && !mapJoined.containsKey(props.author.getId())) {
+                mapJoined.put(props.author.getId(), player);
             }
-            eventChannel.createMessage("You're in!").block();
+            props.eventChannel.createMessage("You're in!").block();
 
         }
 
-        if (command.equalsIgnoreCase("start")) {
+        if (props.command.equalsIgnoreCase("start")) {
             boolean a = false;
             while (!a) {
                 // assignes bengeles & sends messages
                 a = setBengeles(mapJoined);
             }
-            eventChannel.createMessage("DONE!").block();
+            props.eventChannel.createMessage("DONE!").block();
         }
 
-        if (command.equalsIgnoreCase("reset")) {
+        if (props.command.equalsIgnoreCase("reset")) {
             reset(event, mapJoined);
         }
 
-        if (command.equalsIgnoreCase("list")) {
+        if (props.command.equalsIgnoreCase("list")) {
             var mssg = "";
             for (var player : mapJoined.values()) {
                 mssg += "\n" + player.name;
             }
-            eventChannel.createMessage("Joined: " + mapJoined.size() + mssg).block();
+            props.eventChannel.createMessage("Joined: " + mapJoined.size() + mssg).block();
         }
 
-        if (command.equalsIgnoreCase("remove")) {
+        if (props.command.equalsIgnoreCase("remove")) {
             // gets the name
             var name = "";
-            for (String string : messageParameters) {
+            for (String string : props.params) {
                 name += string;
             }
 
@@ -85,9 +83,9 @@ public class EngeleBengele {
             for (var a : mapJoined.entrySet()) {
                 if (a.getValue().name.replaceAll("\\s+", "").equalsIgnoreCase(name)) {
                     mapJoined.remove(a.getKey());
-                    eventChannel.createMessage("Removed.").block();
+                    props.eventChannel.createMessage("Removed.").block();
                 } else {
-                    eventChannel
+                    props.eventChannel
                             .createMessage("Name not found. Use " + Main.prefix + "EB list to view all playernames.")
                             .block();
                 }

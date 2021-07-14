@@ -1,10 +1,7 @@
 package StubenBot;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 import java.awt.Color;
+import java.util.ArrayList;
 
 import StubenBot.EngeleBengele.EngeleBengele;
 import StubenBot.SportTracker.SportTracker;
@@ -30,7 +27,7 @@ public class CommandDistributer {
             if (event.getMessage().getContent().get().startsWith(prefix)) {
                 complexCommand(event);
             } else if (event.getMessage().getContent().get().startsWith(stickerpref)) {
-                StickersClass.stickerEvent(event);
+                StickerHandler.stickerEvent(event);
             } else {
                 reaction(event);
             }
@@ -48,23 +45,19 @@ public class CommandDistributer {
 
     // overcomplicated, just use quickCommands
     private static void complexCommand(MessageCreateEvent event) {
-        var eventChannel = event.getMessage().getChannel().block();
-        String messageContent = event.getMessage().getContent().orElse("");
-        List<String> messagePieces = new LinkedList<>(Arrays.asList(messageContent.split(" ")));
-        var messagePrefix = messagePieces.remove(0);
-        var command = messagePrefix.substring(1);
+        CommandProperties properties = new CommandProperties(event);
 
-        if (messagePrefix.equalsIgnoreCase(prefix + "EB")) {
-            EngeleBengele.handleCommand(event, command, messagePieces, eventChannel);
+        if (properties.command.equalsIgnoreCase(prefix + "EB")) {
+            EngeleBengele.handleCommand(event, properties);
         }
 
-        else if (messagePrefix.equalsIgnoreCase(prefix + "SP")) {
-            SportTracker.handleCommand(event, command, messagePieces, eventChannel);
+        else if (properties.command.equalsIgnoreCase(prefix + "SP")) {
+            SportTracker.handleCommand(event, properties);
 
         }
 
         else {
-            quickCommands(event, command, messagePieces, eventChannel);
+            quickCommands(event, properties);
         }
 
         // found überprüft ob der Command irgentwo gefunden wurde
@@ -74,49 +67,97 @@ public class CommandDistributer {
          */
     }
 
-    private static void quickCommands(MessageCreateEvent event, String command, List<String> messagePieces,
-            MessageChannel eventChannel) {
-        switch (command) {
+    private static void quickCommands(MessageCreateEvent event, CommandProperties props) {
+        props.removePrefix();
+
+        switch (props.command.toLowerCase()) {
             case "ping":
-            case "Ping":
-                eventChannel.createMessage("Pong!").block();
+                props.eventChannel.createMessage("Pong!").block();
                 break;
+
+            // --------------- General --------------------
+
             case "help":
             case "commands":
-                sendCommandsMessage(event, eventChannel);
+                sendCommandsMessage(event, props.eventChannel);
                 break;
 
-            case "toggleRussianGrammar":
-                toggleRussianGrammar(event, eventChannel);
+            case "togglerussiangrammar":
+                toggleGlobalRussianGrammar(event, props.eventChannel);
                 break;
 
-            case "addSticker":
-                StickersClass.addStickerEvent(event, messagePieces, eventChannel);
+            // --------------- Sticker --------------------
+
+            case "addsticker":
+                StickerHandler.addStickerEvent(event, props);
                 break;
-            case "deleteSticker":
-            case "removeSticker":
-                StickersClass.deleteSticker(event, messagePieces, eventChannel);
+
+            case "deletesticker":
+            case "removesticker":
+                StickerHandler.deleteStickerEvent(event, props);
+                break;
+
+            // --------------- Auth --------------------
+
+            case "getauthlvl":
+                Globals.createEmbed(props.eventChannel, Color.MAGENTA, "Your Authorizationlevel is: **"
+                        + Authorizer.getAuthorizationLevel(event, Main.authorizations) + "**", "");
+                break;
+
+            case "getallauthlvl":
+            case "getallauthids":
+                getAllAuthLvl(event, props);
+                break;
+
+            case "setauthlvl":
+            case "changeauthlvl":
+                changeAuthLVL(event, props);
+                break;
+
+            case "removeauthid":
+            case "deleteauthid":
+            case "removeauthlvl": // cuz ppl are dumb
+                removeAuthID(event, props);
                 break;
 
             default:
+                props.eventChannel.createMessage("command not found...").block();
 
         }
 
     }
 
-    
-
     private static void sendCommandsMessage(MessageCreateEvent event, MessageChannel channel) {
+
         String mssg = " ---- Sticker ---- ";
         mssg += buildCommandDescription(". ", "", "Listet alle Sticker");
         mssg += buildCommandDescription(".", "<stickername>", "Sendet jenen Sticker");
         mssg += buildCommandDescription(".", "help", "Info & Commands");
+        if (Authorizer.getAuthorizationLevel(event, Main.authorizations) >= 1) {
+            mssg += " \n---- LVL1 ---- ";
+            mssg += buildCommandDescription("%", "addSticker <name> <url>", "add a Sticker to the Collection");
+            mssg += buildCommandDescription("%", "removeSticker <name>", "remove a Sticker from the Collection");
+        }
 
         mssg += " \n---- General ---- ";
         mssg += buildCommandDescription(prefix, "EB commands", "Engele Bengele!");
         mssg += buildCommandDescription(prefix, "SP commands", "Sport Tracker");
+        if (Authorizer.getAuthorizationLevel(event, Main.authorizations) >= 2) {
+            mssg += " \n---- LVL2 ---- ";
+            mssg += buildCommandDescription("%", "toggleRussianGrammar", "Toggles the Russian Autocorrection");
+        }
 
-        mssg += "\nWenn du a coole Idee für a Funktion fürn bot hosch, feel free es oanem von die Mods weiterzuleiten!";
+        mssg += " \n---- Authorization ---- ";
+        mssg += buildCommandDescription(prefix, "getAuthLVL", "What Authorization Level are you at?");
+        if (Authorizer.getAuthorizationLevel(event, Main.authorizations) >= 1) {
+            mssg += buildCommandDescription(prefix, "setAuthLVL", "Sets the Auth. Level of an ID");
+            mssg += buildCommandDescription(prefix, "deleteAuthID", "Removes the Auth. Level of an ID");
+        }
+        if (Authorizer.getAuthorizationLevel(event, Main.authorizations) >= 2) {
+            mssg += buildCommandDescription(prefix, "getAllAuthIDs", "Lists all registered authIDs");
+        }
+
+        mssg += "\n\nWenn du a coole Idee für a Funktion fürn bot hosch, feel free es oanem von die Mods weiterzuleiten!";
 
         Globals.createEmbed(channel, Color.BLACK, "", mssg);
     }
@@ -125,10 +166,14 @@ public class CommandDistributer {
         return "\n" + "`" + pref + command + " :` " + description;
     }
 
-    private static void toggleRussianGrammar(MessageCreateEvent event, MessageChannel channel) {
-        if (event.getMessage().getAuthor().get().getId().asString().equals("317716883077988354")) {
+    // toggles global russian grammar
+    private static void toggleGlobalRussianGrammar(MessageCreateEvent event, MessageChannel channel) {
+        // only me can do this
+        if (Authorizer.getAuthorizationLevel(event, Main.authorizations) >= 2) {
             russianGrammar = !russianGrammar;
             channel.createMessage("`RUSSIAN GRAMMAR: " + russianGrammar + "`").block();
+        } else {
+            Globals.createEmbed(channel, Color.RED, "", "You are not authorized to use this Command");
         }
     }
 
@@ -247,6 +292,64 @@ public class CommandDistributer {
              * });
              */
         }).block();
+    }
+
+    private static void changeAuthLVL(MessageCreateEvent event, CommandProperties props) {
+        if (props.params.size() == 2) {
+            var id = props.params.get(0);
+            try {
+                var lvl = Integer.parseInt(props.params.get(1));
+                if (lvl >= 0 && lvl <= 10) {
+                    if (Authorizer.getAuthorizationLevel(event, Main.authorizations) > lvl) {
+                        if (Authorizer.changeAuthorization(id, lvl, Main.authorizations, Main.authFilepath)) {
+                            Globals.createEmbed(props.eventChannel, Color.MAGENTA, "",
+                                    "Changed the Authorization Level of " + id + " to " + lvl + ".");
+                        }
+                    } else {
+                        Globals.createEmbed(props.eventChannel, Color.RED, "",
+                                "Your Authorization Level is not high enough for this Command.");
+                    }
+                } else {
+                    Globals.createEmbed(props.eventChannel, Color.RED, "", "Choose a Level between 0 and 10 ");
+                }
+            } catch (Exception e) {
+                System.out.println("CommandDistributer: changeAuthLVL: Could not Convert to int");
+                Globals.createEmbed(props.eventChannel, Color.RED, "",
+                        "Unsuccessful: second parameter must be an Integer");
+            }
+        } else {
+            Globals.createEmbed(props.eventChannel, Color.RED, "", "Wrong Syntax");
+        }
+    }
+
+    private static void removeAuthID(MessageCreateEvent event, CommandProperties props) {
+        if (props.params.size() == 1) {
+            var id = props.params.get(0);
+            if (Authorizer.getAuthorizationLevel(event, Main.authorizations) > Authorizer.getAuthorizationLevel(id,
+                    Main.authorizations)) {
+                if (Authorizer.deleteAuthorization(id, Main.authorizations, Main.authFilepath)) {
+                    Globals.createEmbed(props.eventChannel, Color.MAGENTA, "",
+                            "Removed the Authorization Level of " + id + ".");
+                }
+
+            } else {
+                Globals.createEmbed(props.eventChannel, Color.RED, "",
+                        "Your Authorization Level is not high enough for this Command.");
+            }
+        } else {
+            Globals.createEmbed(props.eventChannel, Color.RED, "",
+                    "Wrong Syntax, try " + Main.prefix + "removeauthid <id>");
+        }
+    }
+
+    private static void getAllAuthLvl(MessageCreateEvent event, CommandProperties props) {
+        if (Authorizer.getAuthorizationLevel(event, Main.authorizations) >= 2) {
+            var mssg = "";
+            for (var authID : Main.authorizations) {
+                mssg += authID.id + "  :  " + authID.level + "\n";
+            }
+            Globals.createEmbed(props.eventChannel, Color.MAGENTA, "All registered authIDs:", mssg);
+        }
     }
 
     private static void test() {
