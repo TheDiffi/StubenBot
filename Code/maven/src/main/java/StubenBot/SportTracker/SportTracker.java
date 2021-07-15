@@ -1,12 +1,12 @@
 package StubenBot.SportTracker;
 
-import java.awt.Color;
 
 import StubenBot.CommandDistributer;
 import StubenBot.CommandProperties;
 import StubenBot.Globals;
 import StubenBot.Main;
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.rest.util.Color;
 
 public class SportTracker {
 

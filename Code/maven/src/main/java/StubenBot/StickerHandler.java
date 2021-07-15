@@ -1,6 +1,5 @@
 package StubenBot;
 
-import java.awt.Color;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Reader;
@@ -14,6 +13,7 @@ import com.github.cliftonlabs.json_simple.JsonObject;
 import com.github.cliftonlabs.json_simple.Jsoner;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.rest.util.Color;
 
 public class StickerHandler {
 
@@ -31,7 +31,7 @@ public class StickerHandler {
     public static void stickerEvent(MessageCreateEvent event) {
         final int distance = 20;
         var eventChannel = event.getMessage().getChannel().block();
-        String messageContent = event.getMessage().getContent().orElse("");
+        String messageContent = event.getMessage().getContent();
         var command = messageContent.replace(".", "");
 
         // sends a list of all available stickers ------------------------------------

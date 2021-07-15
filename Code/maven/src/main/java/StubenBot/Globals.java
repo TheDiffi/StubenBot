@@ -1,6 +1,6 @@
 package StubenBot;
 
-import java.awt.Color;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -9,20 +9,23 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+//import java.awt.Color;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.util.Snowflake;
+import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.rest.util.Color;
+
 
 //In dieser Klasse werden alle Global nützliche Methoden geseichert
 public class Globals {
 
-	public static Message createEmbed(MessageChannel channel, Color color, String title, String description) {
+	public static Message createEmbed(MessageChannel channel, Color magenta, String title, String description) {
 		var embed = channel.createEmbed(emb -> {
-			emb.setColor(color).setTitle(title).setDescription(description);
+			emb.setColor(magenta).setTitle(title).setDescription(description);
 
 		}).block();
 		return embed;

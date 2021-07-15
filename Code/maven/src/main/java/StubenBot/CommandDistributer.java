@@ -1,13 +1,13 @@
 package StubenBot;
 
-import java.awt.Color;
 import java.util.ArrayList;
 
 import StubenBot.EngeleBengele.EngeleBengele;
 import StubenBot.SportTracker.SportTracker;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.MessageChannel;
+import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.rest.util.Color;
 
 public class CommandDistributer {
 
@@ -18,15 +18,15 @@ public class CommandDistributer {
     private static boolean russianGrammar = false;
 
     public static void handleCommands(MessageCreateEvent event) {
-        if (event.getMessage().getContent().isPresent()) {
+        if (event.getMessage().getContent() != null) {
             deleteOldMessages();
 
             test();
 
             // tests if message starts with prefix
-            if (event.getMessage().getContent().get().startsWith(prefix)) {
+            if (event.getMessage().getContent().startsWith(prefix)) {
                 complexCommand(event);
-            } else if (event.getMessage().getContent().get().startsWith(stickerpref)) {
+            } else if (event.getMessage().getContent().startsWith(stickerpref)) {
                 StickerHandler.stickerEvent(event);
             } else {
                 reaction(event);
@@ -182,10 +182,10 @@ public class CommandDistributer {
     }
 
     public static void Memes(MessageCreateEvent event) {
-        if (event.getMessage().getContent().isPresent()) {
+        if (event.getMessage().getContent() != null) {
             // this is not implemented beacuse of performance reasons
             // var eventChannel = event.getMessage().getChannel().block();
-            var content = event.getMessage().getContent().get();
+            var content = event.getMessage().getContent();
 
             if (content.equalsIgnoreCase("f")) {
                 event.getMessage().getChannel().block().createEmbed(spec -> {
@@ -231,16 +231,16 @@ public class CommandDistributer {
                 if (content.indexOf("I ") != -1 || content.indexOf("I'") != -1) {
                     russianCorrection(event, content);
 
-                } else if (event.getMessage().getContent().get().indexOf("idk") != -1
-                        || event.getMessage().getContent().get().indexOf("Idk") != -1
-                        || event.getMessage().getContent().get().indexOf("IDK") != -1) {
+                } else if (event.getMessage().getContent().indexOf("idk") != -1
+                        || event.getMessage().getContent().indexOf("Idk") != -1
+                        || event.getMessage().getContent().indexOf("IDK") != -1) {
                     // event.getMessage().delete().block();
                     event.getMessage().getChannel().block()
                             .createMessage(event.getMember().get().getMention() + " **WE** don't know").block();
 
-                } else if (event.getMessage().getContent().get().indexOf("idc") != -1
-                        || event.getMessage().getContent().get().indexOf("Idc") != -1
-                        || event.getMessage().getContent().get().indexOf("IDC") != -1) {
+                } else if (event.getMessage().getContent().indexOf("idc") != -1
+                        || event.getMessage().getContent().indexOf("Idc") != -1
+                        || event.getMessage().getContent().indexOf("IDC") != -1) {
                     // event.getMessage().delete().block();
                     event.getMessage().getChannel().block()
                             .createMessage(event.getMember().get().getMention() + " **WE** don't care").block();

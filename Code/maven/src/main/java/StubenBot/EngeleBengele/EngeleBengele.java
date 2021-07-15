@@ -1,6 +1,6 @@
 package StubenBot.EngeleBengele;
 
-import java.awt.Color;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -8,9 +8,10 @@ import StubenBot.CommandDistributer;
 import StubenBot.CommandProperties;
 import StubenBot.Globals;
 import StubenBot.Main;
+import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.reaction.ReactionEmoji;
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Color;
 
 public class EngeleBengele {
     public static HashMap<Snowflake, EBPlayer> mapJoined = new HashMap<>();
