@@ -43,16 +43,22 @@ public class Main {
                         System.out.println("Ran into a critical error while starting!");
                     }
                 });
-
+        
+        String a = null;
         client.getEventDispatcher().on(MessageCreateEvent.class)
         .filter(message -> message.getMessage().getAuthor().map(user -> !user.isBot()).orElse(false))
         .subscribe(event ->{
             try {
                 CommandDistributer.handleCommands(event);
+                System.out.println(a.length());
             } catch (Exception e) {
                 event.getMessage().getChannel().block().createMessage(
-                    "Ran into an critcal exception"
+                    "avoided critical Exception, pls don't repeat what u did *laughs in pain*  😰"
                 ).block();
+
+                if(event.getGuild().equals("\n 703300248843583569")){
+                    event.getMessage().getChannel().block().createMessage(e.toString()).block();
+                }
             }
         }
         );
