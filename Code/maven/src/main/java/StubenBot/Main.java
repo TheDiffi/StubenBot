@@ -1,13 +1,30 @@
 package StubenBot;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
+import javax.swing.event.ChangeEvent;
+
+import com.github.cliftonlabs.json_simple.JsonException;
+
+import discord4j.common.util.Snowflake;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.channel.Channel;
+import discord4j.core.object.entity.channel.GuildChannel;
+import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.discordjson.json.gateway.MessageCreate;
+import discord4j.rest.util.Color;
+import io.netty.channel.ChannelId;
 
 
 public class Main {
@@ -42,19 +59,31 @@ public class Main {
                         System.out.println("Ran into a critical error while starting!");
                     }
                 });
-        
-        String a = null;
+
         client.getEventDispatcher().on(MessageCreateEvent.class)
         .filter(message -> message.getMessage().getAuthor().map(user -> !user.isBot()).orElse(false))
         .subscribe(event ->{
             try {
                 CommandDistributer.handleCommands(event);
-                System.out.println(a.length());
             } catch (Exception e) {
-                event.getMessage().getChannel().block().createMessage(
-                    "avoided critical Exception, pls don't repeat what u did *laughs in pain*  😰"
-                ).block();
+                Globals.createEmbed(event.getMessage().getChannel().block(), Color.RED, "Critical Error", 
+                "avoided critical Exception, pls don't repeat what u did *laughs in pain*  😰 \n" +
+                "But don't worry a Developer has already been notifed ✉️"
+                );
 
+                //dtf does not stand for waht you think it stands for :)
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");  
+                LocalDateTime now = LocalDateTime.now();  
+
+                MessageChannel channel = (MessageChannel) client.getChannelById(Snowflake.of("866007421738025020")).block();
+                Role dev = client.getRoleById(Snowflake.of("707981224773288009"), Snowflake.of("866254682360119298")).block();
+
+                channel.createMessage(dev.getMention()).block();
+                Globals.createEmbed(channel, Color.GREEN, "Bot ran into an error --- " + dtf.format(now), 
+                    e.toString()       
+                );
+
+                //this doesnt seem to do anything
                 if(event.getGuild().equals("\n 703300248843583569")){
                     event.getMessage().getChannel().block().createMessage(e.toString()).block();
                 }
@@ -67,13 +96,15 @@ public class Main {
 
     }
 
-    public static void bootup() {
+    public static void bootup() throws IOException, JsonException {
         // reads stickers
         StickerHandler.setOSDependentFilepath();
         StickerHandler.reloadStickers();
 
         // reads Authorizations
         authorizations = Authorizer.readAuthorizedIDs(authFilepath);
+
+        Globals.writeJsonArray("test.json", "sticker","drip", "https://cdn.discordapp.com/attachments/776384582080921621/826353031468679188/unknown.png");
 
     }
 

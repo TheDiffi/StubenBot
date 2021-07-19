@@ -271,7 +271,7 @@ public class StickerHandler {
 
             });
 
-            System.out.println(Main.registeredStickers.toString());
+            // System.out.println(Main.registeredStickers.toString());
 
             // close reader
             reader.close();

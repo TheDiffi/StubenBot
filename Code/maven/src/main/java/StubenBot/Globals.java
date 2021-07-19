@@ -9,7 +9,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-//import java.awt.Color;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.github.cliftonlabs.json_simple.JsonArray;
+import com.github.cliftonlabs.json_simple.JsonException;
+import com.github.cliftonlabs.json_simple.JsonObject;
+import com.github.cliftonlabs.json_simple.Jsoner;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -18,6 +23,13 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.rest.util.Color;
+
+import java.io.FileReader;
+import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+
 
 
 //In dieser Klasse werden alle Global nützliche Methoden geseichert
@@ -145,4 +157,66 @@ public class Globals {
 
 	}
 
+	public static String readJSON(String filename, String var) throws IOException, JsonException{
+        // read the array
+        Reader reader = Files.newBufferedReader(Paths.get(filename));
+        JsonObject parser = (JsonObject) Jsoner.deserialize(reader);
+		String ret = parser.get(var).toString();
+        // close reader
+        reader.close();
+        return ret;
+	}
+
+	public static void writeJSON(String filename, String var, String value) throws IOException, JsonException{
+		JsonObject obj = new JsonObject();
+        obj.put(var, value);
+		BufferedWriter writer = Files.newBufferedWriter(Paths.get(filename));
+
+		if(readJSON(filename, var) != null){
+			 // writes the stickers object
+			 Jsoner.serialize(obj, writer);
+
+			 // close the writer
+			 writer.close();
+		}
+
+	}
+
+    public static void writeJsonArray(String filename, String arrayname ,String var, String val) {
+		//not 100% working yet, because i have problems reading the array if it is empty (duh)
+        try {
+			JsonArray jsonArray = new JsonArray();
+            JsonObject obj = new JsonObject();
+            // create a writer stickers\\stickers.json
+            BufferedWriter writer = Files.newBufferedWriter(Paths.get(filename));
+
+            // appends it to the existing stickers
+            obj.put(var, val);
+            jsonArray.add(obj);
+
+            // puts the array in the stickers object
+            JsonObject stickerObject = new JsonObject();
+            stickerObject.put("sticker", jsonArray);
+
+            // writes the stickers object
+            Jsoner.serialize(stickerObject, writer);
+
+            // close the writer
+            writer.close();
+            // success
+        } catch (IOException ex) {
+            ex.printStackTrace();
+
+        }
+    }
+
+    public static JsonArray readJsonArray(String filename, String arrayname) throws IOException, JsonException {
+        // read the array
+        Reader reader = Files.newBufferedReader(Paths.get(filename));
+        JsonObject parser = (JsonObject) Jsoner.deserialize(reader);
+        JsonArray jsonArray = (JsonArray) parser.get(arrayname);
+        // close reader
+        reader.close();
+        return jsonArray;
+    }
 }

@@ -89,12 +89,12 @@ public class CommandDistributer {
             // --------------- Sticker --------------------
 
             case "addsticker":
-                StickerHandler.addStickerEvent(event, props);
+                // StickerHandler.addStickerEvent(event, props);
                 break;
 
             case "deletesticker":
             case "removesticker":
-                StickerHandler.deleteStickerEvent(event, props);
+                // StickerHandler.deleteStickerEvent(event, props);
                 break;
 
             // --------------- Auth --------------------
