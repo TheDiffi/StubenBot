@@ -22,8 +22,6 @@ public class CommandDistributer {
         if (event.getMessage().getContent() != null) {
             deleteOldMessages();
 
-            test();
-
             // tests if message starts with prefix
             if (event.getMessage().getContent().startsWith(prefix)) {
                 complexCommand(event);
@@ -102,8 +100,9 @@ public class CommandDistributer {
 
             //when nothing added = your auth level, otherwise authlevel of that id
             case "getauthlvl":
+                int authlevel = Authorizer.getAuthorizationLevel(event, Main.authorizations);
                 Globals.createEmbed(props.eventChannel, Color.MAGENTA, "The Authorizationlevel of " + Authorizer.getUserByID(event) +" is: **"
-                        + Authorizer.getAuthorizationLevel(event, Main.authorizations) + "**", "");
+                        + convertAuthLeveltoLevelName(authlevel) + "** " + "(" + authlevel + ")", "");
                 break;
 
             case "getallauthlvl":
@@ -354,8 +353,21 @@ public class CommandDistributer {
         }
     }
 
-    private static void test() {
-
+    public static String convertAuthLeveltoLevelName(int authlevel){
+        switch (authlevel) {
+            case 0:
+                return "User";
+            case 1:
+                return "Moderator";
+            case 2:
+                return "Admin";
+            case 4:
+                return "Developer 😎";
+            case 10:
+                return "Owner";
+            default:
+                return "Unknown Authorization";
+        }
     }
 
 }

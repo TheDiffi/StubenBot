@@ -214,8 +214,6 @@ public class Authorizer {
         } catch (IndexOutOfBoundsException e) {
             otherID = null;
         }
-
-
         if(otherID != null){
             // looks for a matching id
             var usr = Main.client.getUserById(Snowflake.of(otherID)); 
