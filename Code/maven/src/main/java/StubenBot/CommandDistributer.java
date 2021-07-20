@@ -6,6 +6,7 @@ import StubenBot.EngeleBengele.EngeleBengele;
 import StubenBot.SportTracker.SportTracker;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.rest.util.Color;
 
@@ -89,18 +90,19 @@ public class CommandDistributer {
             // --------------- Sticker --------------------
 
             case "addsticker":
-                // StickerHandler.addStickerEvent(event, props);
+                StickerHandler.addStickerEvent(event, props);
                 break;
 
             case "deletesticker":
             case "removesticker":
-                // StickerHandler.deleteStickerEvent(event, props);
+                StickerHandler.deleteStickerEvent(event, props);
                 break;
 
             // --------------- Auth --------------------
 
+            //when nothing added = your auth level, otherwise authlevel of that id
             case "getauthlvl":
-                Globals.createEmbed(props.eventChannel, Color.MAGENTA, "Your Authorizationlevel is: **"
+                Globals.createEmbed(props.eventChannel, Color.MAGENTA, "The Authorizationlevel of " + Authorizer.getUserByID(event) +" is: **"
                         + Authorizer.getAuthorizationLevel(event, Main.authorizations) + "**", "");
                 break;
 
@@ -148,7 +150,7 @@ public class CommandDistributer {
         }
 
         mssg += " \n---- Authorization ---- ";
-        mssg += buildCommandDescription(prefix, "getAuthLVL", "What Authorization Level are you at?");
+        mssg += buildCommandDescription(prefix, "getAuthLVL", "Either gets your own authorization level or the one of a given ID");
         if (Authorizer.getAuthorizationLevel(event, Main.authorizations) >= 1) {
             mssg += buildCommandDescription(prefix, "setAuthLVL", "Sets the Auth. Level of an ID");
             mssg += buildCommandDescription(prefix, "deleteAuthID", "Removes the Auth. Level of an ID");

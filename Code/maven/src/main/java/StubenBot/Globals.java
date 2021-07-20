@@ -182,10 +182,15 @@ public class Globals {
 
 	}
 
-    public static void writeJsonArray(String filename, String arrayname ,String var, String val) {
-		//not 100% working yet, because i have problems reading the array if it is empty (duh)
+    public static void writeJsonArray(String filename, String arrayname ,String var, String val) throws JsonException {
+		JsonArray jsonArray;
         try {
-			JsonArray jsonArray = new JsonArray();
+
+			if(readJsonArray(filename, arrayname) == null){
+				jsonArray = new JsonArray();
+			}else{
+				jsonArray = readJsonArray(filename, arrayname);
+			}
             JsonObject obj = new JsonObject();
             // create a writer stickers\\stickers.json
             BufferedWriter writer = Files.newBufferedWriter(Paths.get(filename));
@@ -207,16 +212,24 @@ public class Globals {
         } catch (IOException ex) {
             ex.printStackTrace();
 
-        }
+        } catch (NullPointerException e) {
+			e.printStackTrace();
+		}
     }
 
     public static JsonArray readJsonArray(String filename, String arrayname) throws IOException, JsonException {
         // read the array
         Reader reader = Files.newBufferedReader(Paths.get(filename));
-        JsonObject parser = (JsonObject) Jsoner.deserialize(reader);
-        JsonArray jsonArray = (JsonArray) parser.get(arrayname);
+		JsonArray jsonArray;
+		try {
+			JsonObject parser = (JsonObject) Jsoner.deserialize(reader);
+			jsonArray = (JsonArray) parser.get(arrayname);
+		} catch (Exception e) {
+			jsonArray = null;
+		}
         // close reader
         reader.close();
         return jsonArray;
     }
+	
 }

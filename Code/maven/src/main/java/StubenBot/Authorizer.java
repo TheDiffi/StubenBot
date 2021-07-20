@@ -3,7 +3,12 @@ package StubenBot;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.Embed.Author;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.User;
+import reactor.core.publisher.Mono;
 
 public class Authorizer {
 
@@ -67,13 +72,30 @@ public class Authorizer {
     public static int getAuthorizationLevel(MessageCreateEvent event, ArrayList<AuthID> authList) {
         var channelID = event.getMessage().getChannelId().asString();
         var authorID = event.getMessage().getAuthor().get().getId().asString();
+        var otherID = "";
 
-        // looks for a matching id
-        for (var ID : authList) {
-            if (authorID.equals(ID.id) || channelID.equals(ID.id)) {
-                return ID.level;
+        try {
+            otherID = event.getMessage().getContent().split(" ")[1];
+        } catch (IndexOutOfBoundsException e) {
+            otherID = null;
+        }
+
+        if(otherID != null){
+            // looks for a matching id
+            for (var ID : authList) {
+                if (otherID.equals(ID.id) || channelID.equals(ID.id)) {
+                    return ID.level;
+                }
+            }
+        } else {
+            // looks for a matching id
+            for (var ID : authList) {
+                if (authorID.equals(ID.id) || channelID.equals(ID.id)) {
+                    return ID.level;
+                }
             }
         }
+
 
         // if none found -> standard = 0
         return 0;
@@ -183,6 +205,25 @@ public class Authorizer {
         }
 
         return null;
+    }
+
+    public static String getUserByID(MessageCreateEvent event){
+        var otherID = "";
+        try {
+            otherID = event.getMessage().getContent().split(" ")[1];
+        } catch (IndexOutOfBoundsException e) {
+            otherID = null;
+        }
+
+
+        if(otherID != null){
+            // looks for a matching id
+            var usr = Main.client.getUserById(Snowflake.of(otherID)); 
+            return usr.block().getUsername();
+        } else {
+            return event.getMessage().getAuthor().get().getUsername();
+        }
+        
     }
 
 }

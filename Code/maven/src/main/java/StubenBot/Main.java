@@ -33,7 +33,7 @@ public class Main {
     public static final String authFilepath = "local/authorizedIDs.txt";
     public static TreeMap<String, Sticker> registeredStickers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     public static ArrayList<AuthID> authorizations = new ArrayList<>();
-
+    public static GatewayDiscordClient client;
     public static void main(String[] args) throws Exception {
 
         bootup();
@@ -41,7 +41,7 @@ public class Main {
         // loads the Bot api
         //Dev2 token: ODY1MjEzNzEzOTc5ODAxNjcy.YPAvEA.rWX55MIMqtEfz2o9Xphvym2twu4
         //original token: ODI3NjEyODE1OTU4NjA1ODM0.YGdkfw.3rQNr0IKh8fpkKlMhrV19N3RRHI
-        GatewayDiscordClient client = DiscordClientBuilder.create("ODY1MjEzNzEzOTc5ODAxNjcy.YPAvEA.rWX55MIMqtEfz2o9Xphvym2twu4")
+        client = DiscordClientBuilder.create("ODY1MjEzNzEzOTc5ODAxNjcy.YPAvEA.rWX55MIMqtEfz2o9Xphvym2twu4")
             .build()
             .login()
             .block();
@@ -87,6 +87,7 @@ public class Main {
                 if(event.getGuild().equals("\n 703300248843583569")){
                     event.getMessage().getChannel().block().createMessage(e.toString()).block();
                 }
+
             }
         }
         );
@@ -103,9 +104,7 @@ public class Main {
 
         // reads Authorizations
         authorizations = Authorizer.readAuthorizedIDs(authFilepath);
-
-        Globals.writeJsonArray("test.json", "sticker","drip", "https://cdn.discordapp.com/attachments/776384582080921621/826353031468679188/unknown.png");
-
     }
+
 
 }
