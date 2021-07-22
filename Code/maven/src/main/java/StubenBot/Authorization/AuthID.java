@@ -1,9 +1,9 @@
-package StubenBot;
+package StubenBot.Authorization;
 
 
 public class AuthID {
-    String id;
-    int level;
+    public String id;
+    public int level;
 
     AuthID(String id, int level){
         this.id = id;

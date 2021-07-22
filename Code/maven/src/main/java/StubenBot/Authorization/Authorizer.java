@@ -1,14 +1,13 @@
-package StubenBot;
+package StubenBot.Authorization;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import StubenBot.Globals;
+import StubenBot.Main;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.Embed.Author;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.User;
-import reactor.core.publisher.Mono;
+
 
 public class Authorizer {
 
