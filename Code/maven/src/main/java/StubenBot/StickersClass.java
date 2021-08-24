@@ -1,11 +1,13 @@
 package StubenBot;
 
+import discord4j.rest.util.Color;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 
 import com.github.cliftonlabs.json_simple.JsonArray;
 import com.github.cliftonlabs.json_simple.JsonException;
@@ -13,28 +15,30 @@ import com.github.cliftonlabs.json_simple.JsonObject;
 import com.github.cliftonlabs.json_simple.Jsoner;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.rest.util.Color;
+import discord4j.core.object.entity.channel.MessageChannel;
 
-public class StickerHandler {
+public class StickersClass {
 
     private static String stickerJsonFilepath = "stickers/stickers.json";
 
-    public static void setOSDependentFilepath() {
+    private static final int distance = 20;
+
+    public static void determineOS() {
         String os = System.getProperty("os.name");
         System.out.println("Starting on: " + os);
         if (os.startsWith("Windows")) {
             stickerJsonFilepath = "stickers\\stickers.json";
         }
+
     }
 
     // , Command
     public static void stickerEvent(MessageCreateEvent event) {
-        final int distance = 20;
         var eventChannel = event.getMessage().getChannel().block();
-        String messageContent = event.getMessage().getContent();
+        String messageContent = event.getMessage().getContent() != null ? event.getMessage().getContent() : "";
         var command = messageContent.replace(".", "");
 
-        // sends a list of all available stickers ------------------------------------
+        // sends a list of all available stickers
         if (messageContent.equals(".")) {
             var msg = "**All Stickers:**\n";
             int i = 1;
@@ -63,18 +67,13 @@ public class StickerHandler {
             if (event.getGuildId().isPresent()) {
                 CommandDistributer.toDelete.add(event.getMessage());
             }
-        }
 
-        // .help Command ------------------------------------
-        else if (messageContent.equals(".help")) {
+            // .help Command
+        } else if (messageContent.equals(".help")) {
             String mssg = " ---- Sticker ---- ";
             mssg += buildCommandDescription(". ", "Listet alle Sticker");
             mssg += buildCommandDescription(".<stickername>", "Sendet jenen Sticker");
-            if (Authorizer.getAuthorizationLevel(event, Main.authorizations) >= 1) {
-                mssg += "\n---- LVL1 ---- ";
-                mssg += buildCommandDescription("%addSticker <name> <url>", "add a Sticker to the Collection");
-                mssg += buildCommandDescription("%removeSticker <name>", "remove a Sticker from the Collection");
-            }
+            
 
             // so it deletes after
             CommandDistributer.toDelete
@@ -85,9 +84,7 @@ public class StickerHandler {
             }
 
         }
-
         // if the stickername is registered, it gets send
-        // ------------------------------------
         else if (Main.registeredStickers.get(command) != null) {
             eventChannel.createMessage(Main.registeredStickers.get(command).url).block();
 
@@ -111,34 +108,36 @@ public class StickerHandler {
 
     }
 
-    private static String buildCommandDescription(String command, String description) {
+    public static String buildCommandDescription(String command, String description) {
         return "\n" + "`" + command + ":` " + description;
     }
 
-    public static void addStickerEvent(MessageCreateEvent event, CommandProperties props) {
-        if (Authorizer.getAuthorizationLevel(event, Main.authorizations) >= 1) {
-            if (props.params.size() >= 2) {
-                if (props.params.get(1).startsWith("http")) {
-                    Sticker newSticker = new Sticker(props.params.get(0), props.params.get(1));
-                    var succsses = addSticker(newSticker);
+    public static void reloadStickers() {
+        Main.registeredStickers.clear();
+        try {
+            // create a reader
+            Reader reader = Files.newBufferedReader(Paths.get(stickerJsonFilepath));
 
-                    if (succsses) {
-                        props.eventChannel.createMessage("Adding Sticker: " + event.getMember().get().getUsername()
-                                + "\nname: " + props.params.get(0) + "\nurl: " + props.params.get(1)).block();
-                        // eventChannel.createMessage("Please confirm with **" + Main.prefix+ "confirm
-                        // **").block();
+            // create parser
+            JsonObject parser = (JsonObject) Jsoner.deserialize(reader);
 
-                    } else {
-                        props.eventChannel.createMessage("Failed!").block();
-                    }
-                } else {
-                    Globals.createEmbed(props.eventChannel, Color.RED, "", "Unsuccsessful: No link detected!");
-                }
-            } else {
-                Globals.createEmbed(props.eventChannel, Color.RED, "", "Unsuccsessful: Wrong Syntax");
-            }
-        } else {
-            Globals.createEmbed(props.eventChannel, Color.RED, "", "You are not authorized to use this Command");
+            JsonArray stickerArray = (JsonArray) parser.get("sticker");
+
+            stickerArray.forEach(entry -> {
+                // creates a sticker object for every element and puts it into the map
+                JsonObject sticker = (JsonObject) entry;
+                Sticker stickerobj = new Sticker((String) sticker.get("name"), (String) sticker.get("url"));
+                Main.registeredStickers.put(stickerobj.name, stickerobj);
+
+            });
+
+            System.out.println(Main.registeredStickers.toString());
+
+            // close reader
+            reader.close();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
 
     }
@@ -179,29 +178,6 @@ public class StickerHandler {
         }
         // failure
         return false;
-    }
-
-    public static void deleteStickerEvent(MessageCreateEvent event, CommandProperties props) {
-        if (Authorizer.getAuthorizationLevel(event, Main.authorizations) >= 1) {
-            if (props.params.size() == 1) {
-                var succsses = deleteSticker(props.params.get(0));
-
-                if (succsses) {
-                    props.eventChannel.createMessage("Deleted Sticker: " + event.getMember().get().getUsername()
-                            + "\nname: " + props.params.get(0)).block();
-                    // eventChannel.createMessage("Please confirm with **" + Main.prefix+ "confirm
-                    // **").block();
-
-                } else {
-                    props.eventChannel.createMessage("Unsuccsessful: No such sticker found").block();
-                }
-            } else {
-                Globals.createEmbed(props.eventChannel, Color.RED, "", "Unsuccsessful: Wrong Syntax");
-            }
-        } else {
-            Globals.createEmbed(props.eventChannel, Color.RED, "", "You are not authorized to use this Command");
-        }
-
     }
 
     private static boolean deleteSticker(String name) {
@@ -252,36 +228,6 @@ public class StickerHandler {
         return false;
     }
 
-    public static void reloadStickers() {
-        Main.registeredStickers.clear();
-        try {
-            // create a reader
-            Reader reader = Files.newBufferedReader(Paths.get(stickerJsonFilepath));
-
-            // create parser
-            JsonObject parser = (JsonObject) Jsoner.deserialize(reader);
-
-            JsonArray stickerArray = (JsonArray) parser.get("sticker");
-
-            stickerArray.forEach(entry -> {
-                // creates a sticker object for every element and puts it into the map
-                JsonObject sticker = (JsonObject) entry;
-                Sticker stickerobj = new Sticker((String) sticker.get("name"), (String) sticker.get("url"));
-                Main.registeredStickers.put(stickerobj.name, stickerobj);
-
-            });
-
-            //System.out.println(Main.registeredStickers.toString());
-
-            // close reader
-            reader.close();
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-    }
-
     private static void backupStickers(JsonObject stickers) {
 
         try {
@@ -302,6 +248,47 @@ public class StickerHandler {
         // close reader
         reader.close();
         return stickerArray;
+    }
+
+    public static void addStickerEvent(MessageCreateEvent event, List<String> messagePieces,
+            MessageChannel eventChannel) {
+        if (messagePieces.size() >= 2) {
+            if (messagePieces.get(1).startsWith("http")) {
+                Sticker newSticker = new Sticker(messagePieces.get(0), messagePieces.get(1));
+                var succsses = addSticker(newSticker);
+
+                if (succsses) {
+                    eventChannel.createMessage("Adding Sticker: " + event.getMember().get().getUsername() + "\nname: "
+                            + messagePieces.get(0) + "\nurl: " + messagePieces.get(1)).block();
+                    // eventChannel.createMessage("Please confirm with **" + Main.prefix+ "confirm
+                    // **").block();
+
+                } else {
+                    eventChannel.createMessage("Failed!").block();
+                }
+            } else {
+                Globals.createEmbed(eventChannel, Color.RED, "", "Unsuccsessful: No link detected!");
+            }
+        }
+
+    }
+
+    public static void deleteSticker(MessageCreateEvent event, List<String> messagePieces,
+            MessageChannel eventChannel) {
+        if (messagePieces.size() == 1) {
+            var succsses = deleteSticker(messagePieces.get(0));
+
+            if (succsses) {
+                eventChannel.createMessage(
+                        "Deleted Sticker: " + event.getMember().get().getUsername() + "\nname: " + messagePieces.get(0))
+                        .block();
+                // eventChannel.createMessage("Please confirm with **" + Main.prefix+ "confirm
+                // **").block();
+
+            } else {
+                eventChannel.createMessage("Failed! (No such sticker)").block();
+            }
+        }
     }
 
 }

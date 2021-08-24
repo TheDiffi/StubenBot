@@ -23,9 +23,9 @@ import discord4j.rest.util.Color;
 //In dieser Klasse werden alle Global nützliche Methoden geseichert
 public class Globals {
 
-	public static Message createEmbed(MessageChannel channel, Color magenta, String title, String description) {
+	public static Message createEmbed(MessageChannel channel, Color color, String title, String description) {
 		var embed = channel.createEmbed(emb -> {
-			emb.setColor(magenta).setTitle(title).setDescription(description);
+			emb.setColor(Color.GRAY).setTitle(title).setDescription(description);
 
 		}).block();
 		return embed;
