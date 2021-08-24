@@ -30,7 +30,7 @@ public class Main {
     public static final String prefix = "%";
     public static final String stickerpref = ".";
     public static final String authFilepath = "local/authorizedIDs.txt";
-    public static TreeMap<String, Sticker> registeredStickers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    // public static TreeMap<String, Sticker> registeredStickers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     public static ArrayList<AuthID> authorizations = new ArrayList<>();
     public static GatewayDiscordClient client;
     public static void main(String[] args) throws Exception {

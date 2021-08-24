@@ -3,19 +3,15 @@ package StubenBot.Polls;
 
 import java.util.function.Consumer;
 
-import StubenBot.Globals;
 import StubenBot.Main;
-import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.event.domain.message.ReactionAddEvent;
+
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.reaction.ReactionEmoji;
-import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageEditSpec;
-import discord4j.rest.util.Color;
-import reactor.core.publisher.Mono;
+
 
 
 public class Pollinator {
@@ -66,9 +62,9 @@ public class Pollinator {
 
 
 
-        //this function updates the poll and writes the percentage beside it
-        //somehow it gets slower the more options are in the poll because i have to 
-        //loop and get the number for all reactions twice.
+/*      this function updates the poll and writes the percentage beside it
+        somehow it gets slower the more options are in the poll because i have to 
+        loop and get the number for all reactions twice. */
         private static void upddatePoll(ReactionAddEvent evt, Message embed){
             ReactionEmoji reactem = evt.getEmoji();
             boolean auth = evt.getUser().block().isBot();
@@ -88,9 +84,6 @@ public class Pollinator {
                 // System.out.println( abc[j] + ") Votes: " + votes + " allReactions " + (allReactions));
             }
                 
-
-            
-
             Consumer<MessageEditSpec> template = spec -> spec.setContent(options.toString());      
             embed.edit(template).block();
 
