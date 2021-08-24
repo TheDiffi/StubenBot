@@ -1,6 +1,5 @@
 package StubenBot;
 
-import discord4j.rest.util.Color;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Reader;
@@ -14,8 +13,10 @@ import com.github.cliftonlabs.json_simple.JsonException;
 import com.github.cliftonlabs.json_simple.JsonObject;
 import com.github.cliftonlabs.json_simple.Jsoner;
 
+import StubenBot.Sticker.Sticker;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.rest.util.Color;
 
 public class StickersClass {
 
