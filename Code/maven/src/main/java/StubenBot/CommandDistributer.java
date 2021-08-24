@@ -2,12 +2,18 @@ package StubenBot;
 
 import java.util.ArrayList;
 
+import StubenBot.Authorization.Authorizer;
+import StubenBot.Authorization.AuthID;
 import StubenBot.EngeleBengele.EngeleBengele;
+import StubenBot.Polls.Pollinator;
 import StubenBot.SportTracker.SportTracker;
+import StubenBot.Sticker.StickerHandler;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.rest.util.Color;
+import StubenBot.Main;
 
 public class CommandDistributer {
 
@@ -17,11 +23,9 @@ public class CommandDistributer {
 
     private static boolean russianGrammar = false;
 
-    public static void handleCommands(MessageCreateEvent event) {
+    public static void handleCommands(MessageCreateEvent event) throws InterruptedException{
         if (event.getMessage().getContent() != null) {
             deleteOldMessages();
-
-            test();
 
             // tests if message starts with prefix
             if (event.getMessage().getContent().startsWith(prefix)) {
@@ -44,7 +48,7 @@ public class CommandDistributer {
     }
 
     // overcomplicated, just use quickCommands
-    private static void complexCommand(MessageCreateEvent event) {
+    private static void complexCommand(MessageCreateEvent event) throws InterruptedException {
         CommandProperties properties = new CommandProperties(event);
 
         if (properties.command.equalsIgnoreCase(prefix + "EB")) {
@@ -67,7 +71,7 @@ public class CommandDistributer {
          */
     }
 
-    private static void quickCommands(MessageCreateEvent event, CommandProperties props) {
+    private static void quickCommands(MessageCreateEvent event, CommandProperties props) throws InterruptedException {
         props.removePrefix();
 
         switch (props.command.toLowerCase()) {
@@ -97,11 +101,22 @@ public class CommandDistributer {
                 StickerHandler.deleteStickerEvent(event, props);
                 break;
 
+            // --------------- Polls --------------------
+
+            case "createpoll":
+                Pollinator.createPoll(event);
+                break;
+            case "stoppoll":
+                //Pollinator.stopPoll
+                break;
+            
             // --------------- Auth --------------------
 
+            //when nothing added = your auth level, otherwise authlevel of that id
             case "getauthlvl":
-                Globals.createEmbed(props.eventChannel, Color.MAGENTA, "Your Authorizationlevel is: **"
-                        + Authorizer.getAuthorizationLevel(event, Main.authorizations) + "**", "");
+                int authlevel = Authorizer.getAuthorizationLevel(event, Main.authorizations);
+                Globals.createEmbed(props.eventChannel, Color.MAGENTA, "The Authorizationlevel of " + Authorizer.getUserByID(event) +" is: **"
+                        + convertAuthLeveltoLevelName(authlevel) + "** " + "(" + authlevel + ")", "");
                 break;
 
             case "getallauthlvl":
@@ -148,7 +163,7 @@ public class CommandDistributer {
         }
 
         mssg += " \n---- Authorization ---- ";
-        mssg += buildCommandDescription(prefix, "getAuthLVL", "What Authorization Level are you at?");
+        mssg += buildCommandDescription(prefix, "getAuthLVL", "Either gets your own authorization level or the one of a given ID");
         if (Authorizer.getAuthorizationLevel(event, Main.authorizations) >= 1) {
             mssg += buildCommandDescription(prefix, "setAuthLVL", "Sets the Auth. Level of an ID");
             mssg += buildCommandDescription(prefix, "deleteAuthID", "Removes the Auth. Level of an ID");
@@ -157,9 +172,16 @@ public class CommandDistributer {
             mssg += buildCommandDescription(prefix, "getAllAuthIDs", "Lists all registered authIDs");
         }
 
+
+        if (Authorizer.getAuthorizationLevel(event, Main.authorizations) >= 2) {
+            mssg += " \n---- Polls ----";
+            mssg += buildCommandDescription(prefix, "createpoll <Title>; Option1 | Option2 | ...", "Create a poll");
+        }
+
         mssg += "\n\nWenn du a coole Idee für a Funktion fürn bot hosch, feel free es oanem von die Mods weiterzuleiten!";
 
         Globals.createEmbed(channel, Color.BLACK, "", mssg);
+
     }
 
     public static String buildCommandDescription(String pref, String command, String description) {
@@ -352,8 +374,21 @@ public class CommandDistributer {
         }
     }
 
-    private static void test() {
-
+    public static String convertAuthLeveltoLevelName(int authlevel){
+        switch (authlevel) {
+            case 0:
+                return "User";
+            case 1:
+                return "Moderator";
+            case 2:
+                return "Admin";
+            case 4:
+                return "Developer 😎";
+            case 10:
+                return "Owner";
+            default:
+                return "Unknown Authorization";
+        }
     }
 
 }

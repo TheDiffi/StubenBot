@@ -1,4 +1,4 @@
-package StubenBot;
+package StubenBot.Sticker;
 
 public class Sticker {
 

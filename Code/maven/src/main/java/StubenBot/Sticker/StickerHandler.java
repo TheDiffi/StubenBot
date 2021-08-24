@@ -1,4 +1,4 @@
-package StubenBot;
+package StubenBot.Sticker;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -12,6 +12,11 @@ import com.github.cliftonlabs.json_simple.JsonException;
 import com.github.cliftonlabs.json_simple.JsonObject;
 import com.github.cliftonlabs.json_simple.Jsoner;
 
+import StubenBot.CommandDistributer;
+import StubenBot.CommandProperties;
+import StubenBot.Globals;
+import StubenBot.Main;
+import StubenBot.Authorization.Authorizer;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.rest.util.Color;
 
@@ -271,7 +276,7 @@ public class StickerHandler {
 
             });
 
-            //System.out.println(Main.registeredStickers.toString());
+            // System.out.println(Main.registeredStickers.toString());
 
             // close reader
             reader.close();
