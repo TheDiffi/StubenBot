@@ -38,7 +38,6 @@ public class Globals {
 	public static Message createEmbed(MessageChannel channel, Color color, String title, String description) {
 		var embed = channel.createEmbed(emb -> {
 			emb.setColor(Color.GRAY).setTitle(title).setDescription(description);
-
 		}).block();
 		return embed;
 	}
@@ -57,6 +56,27 @@ public class Globals {
 		var embed = channel.createEmbed(emb -> {
 			emb.setColor(color).setTitle(title).setDescription(description).setImage(imageUrl).setUrl(url);
 
+		}).block();
+		return embed;
+	}
+	
+	public static Message createEmbed(MessageChannel channel, Color color, String title, String description, ArrayList<String> fields) {
+		var embed = channel.createEmbed(emb -> {
+			emb.setColor(Color.GRAY).setTitle(title).setDescription(description);
+			for (String field : fields) {
+				emb.addField("\u200B", field, true);
+			}
+		}).block();
+		return embed;
+	}
+	
+	public static Message createEmbed(MessageChannel channel, Color color, String title, 
+			ArrayList<String> fields) {
+		var embed = channel.createEmbed(emb -> {
+			emb.setColor(Color.GRAY).setTitle(title);
+			for (String field : fields) {
+				emb.addField("\u200B", field, true);
+			}
 		}).block();
 		return embed;
 	}
