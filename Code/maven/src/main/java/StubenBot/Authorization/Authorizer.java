@@ -3,10 +3,12 @@ package StubenBot.Authorization;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import StubenBot.CommandProperties;
 import StubenBot.Globals;
 import StubenBot.Main;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.rest.util.Color;
 
 
 public class Authorizer {
@@ -221,6 +223,81 @@ public class Authorizer {
             return event.getMessage().getAuthor().get().getUsername();
         }
         
+    }
+
+    public static void changeAuthLVL(MessageCreateEvent event, CommandProperties props) {
+        if (props.params.size() == 2) {
+            var id = props.params.get(0);
+            try {
+                var lvl = Integer.parseInt(props.params.get(1));
+                if (lvl >= 0 && lvl <= 10) {
+                    if (Authorizer.getAuthorizationLevel(event, Main.authorizations) > lvl) {
+                        if (Authorizer.changeAuthorization(id, lvl, Main.authorizations, Main.authFilepath)) {
+                            Globals.createEmbed(props.eventChannel, Color.MAGENTA, "",
+                                    "Changed the Authorization Level of " + id + " to " + lvl + ".");
+                        }
+                    } else {
+                        Globals.createEmbed(props.eventChannel, Color.RED, "",
+                                "Your Authorization Level is not high enough for this Command.");
+                    }
+                } else {
+                    Globals.createEmbed(props.eventChannel, Color.RED, "", "Choose a Level between 0 and 10 ");
+                }
+            } catch (Exception e) {
+                System.out.println("CommandDistributer: changeAuthLVL: Could not Convert to int");
+                Globals.createEmbed(props.eventChannel, Color.RED, "",
+                        "Unsuccessful: second parameter must be an Integer");
+            }
+        } else {
+            Globals.createEmbed(props.eventChannel, Color.RED, "", "Wrong Syntax");
+        }
+    }
+
+    public static void removeAuthID(MessageCreateEvent event, CommandProperties props) {
+        if (props.params.size() == 1) {
+            var id = props.params.get(0);
+            if (Authorizer.getAuthorizationLevel(event, Main.authorizations) > Authorizer.getAuthorizationLevel(id,
+                    Main.authorizations)) {
+                if (Authorizer.deleteAuthorization(id, Main.authorizations, Main.authFilepath)) {
+                    Globals.createEmbed(props.eventChannel, Color.MAGENTA, "",
+                            "Removed the Authorization Level of " + id + ".");
+                }
+
+            } else {
+                Globals.createEmbed(props.eventChannel, Color.RED, "",
+                        "Your Authorization Level is not high enough for this Command.");
+            }
+        } else {
+            Globals.createEmbed(props.eventChannel, Color.RED, "",
+                    "Wrong Syntax, try " + Main.prefix + "removeauthid <id>");
+        }
+    }
+
+    public static void getAllAuthLvl(MessageCreateEvent event, CommandProperties props) {
+        if (Authorizer.getAuthorizationLevel(event, Main.authorizations) >= 2) {
+            var mssg = "";
+            for (var authID : Main.authorizations) {
+                mssg += authID.id + "  :  " + authID.level + "\n";
+            }
+            Globals.createEmbed(props.eventChannel, Color.MAGENTA, "All registered authIDs:", mssg);
+        }
+    }
+
+    public static String convertAuthLeveltoLevelName(int authlevel){
+        switch (authlevel) {
+            case 0:
+                return "User";
+            case 1:
+                return "Moderator";
+            case 2:
+                return "Admin";
+            case 4:
+                return "Developer 😎";
+            case 10:
+                return "Owner";
+            default:
+                return "Unknown Authorization";
+        }
     }
 
 }
