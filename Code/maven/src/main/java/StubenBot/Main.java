@@ -34,9 +34,9 @@ public class Main {
         bootup();
 
         // loads the Bot api
-        //Dev2 token: ODY1MjEzNzEzOTc5ODAxNjcy.YPAvEA.rWX55MIMqtEfz2o9Xphvym2twu4
-        //original token: ODI3NjEyODE1OTU4NjA1ODM0.YGdkfw.3rQNr0IKh8fpkKlMhrV19N3RRHI
-        client = DiscordClientBuilder.create("ODI3NjEyODE1OTU4NjA1ODM0.YGdkfw.dv70gGT7a9EBbnEKY8bUMJTS2Lk")
+        //Dev2 token: ODI3NjEyODE1OTU4NjA1ODM0.YGdkfw.Rx95HYsyxiYVnRlHMCdrqP_h9RE
+        //original token: ODI3NjEyODE1OTU4NjA1ODM0.YGdkfw.dv70gGT7a9EBbnEKY8bUMJTS2Lk
+        client = DiscordClientBuilder.create("ODI3NjEyODE1OTU4NjA1ODM0.YGdkfw.Rx95HYsyxiYVnRlHMCdrqP_h9RE")
             .build()
             .login()
             .block();

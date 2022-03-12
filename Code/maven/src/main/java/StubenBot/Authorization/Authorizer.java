@@ -10,7 +10,6 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.rest.util.Color;
 
-
 public class Authorizer {
 
     // reads the file and returns the list of IDs
@@ -73,30 +72,13 @@ public class Authorizer {
     public static int getAuthorizationLevel(MessageCreateEvent event, ArrayList<AuthID> authList) {
         var channelID = event.getMessage().getChannelId().asString();
         var authorID = event.getMessage().getAuthor().get().getId().asString();
-        var otherID = "";
 
-        try {
-            otherID = event.getMessage().getContent().split(" ")[1];
-        } catch (IndexOutOfBoundsException e) {
-            otherID = null;
-        }
-
-        if(otherID != null){
-            // looks for a matching id
-            for (var ID : authList) {
-                if (otherID.equals(ID.id) || channelID.equals(ID.id)) {
-                    return ID.level;
-                }
-            }
-        } else {
-            // looks for a matching id
-            for (var ID : authList) {
-                if (authorID.equals(ID.id) || channelID.equals(ID.id)) {
-                    return ID.level;
-                }
+        // looks for a matching id
+        for (var ID : authList) {
+            if (authorID.equals(ID.id) || channelID.equals(ID.id)) {
+                return ID.level;
             }
         }
-
 
         // if none found -> standard = 0
         return 0;
@@ -208,21 +190,21 @@ public class Authorizer {
         return null;
     }
 
-    public static String getUserByID(MessageCreateEvent event){
+    public static String getUserByID(MessageCreateEvent event) {
         var otherID = "";
         try {
             otherID = event.getMessage().getContent().split(" ")[1];
         } catch (IndexOutOfBoundsException e) {
             otherID = null;
         }
-        if(otherID != null){
+        if (otherID != null) {
             // looks for a matching id
-            var usr = Main.client.getUserById(Snowflake.of(otherID)); 
+            var usr = Main.client.getUserById(Snowflake.of(otherID));
             return usr.block().getUsername();
         } else {
             return event.getMessage().getAuthor().get().getUsername();
         }
-        
+
     }
 
     public static void changeAuthLVL(MessageCreateEvent event, CommandProperties props) {
@@ -283,7 +265,7 @@ public class Authorizer {
         }
     }
 
-    public static String convertAuthLeveltoLevelName(int authlevel){
+    public static String convertAuthLeveltoLevelName(int authlevel) {
         switch (authlevel) {
             case 0:
                 return "User";
