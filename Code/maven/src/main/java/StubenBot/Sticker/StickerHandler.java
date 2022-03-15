@@ -6,7 +6,6 @@ import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.function.Consumer;
 
 import com.github.cliftonlabs.json_simple.JsonArray;
 import com.github.cliftonlabs.json_simple.JsonException;
@@ -19,10 +18,7 @@ import StubenBot.Globals;
 import StubenBot.Main;
 import StubenBot.Authorization.Authorizer;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.Embed;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
-import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 
 public class StickerHandler {
@@ -40,7 +36,6 @@ public class StickerHandler {
 
     // , Command
     public static void stickerEvent(MessageCreateEvent event) {
-        final int distance = 20;
         var eventChannel = event.getMessage().getChannel().block();
         String messageContent = event.getMessage().getContent();
         var command = messageContent.replace(".", "");
@@ -49,12 +44,11 @@ public class StickerHandler {
         if (messageContent.equals(".")) {
             printAvailableStickers(event, eventChannel);
 
+            // .help Command ------------------------------------
+        } else if (messageContent.equals(".help")) {
+            stickerHelpEvent(event);
 
-        // .help Command ------------------------------------
-       } else if (messageContent.equals(".help")) {
-        stickerHelpEvent(event);
-
-    }
+        }
 
         // if the stickername is registered, it gets send
         // ------------------------------------
@@ -84,6 +78,8 @@ public class StickerHandler {
     private static void printAvailableStickers(MessageCreateEvent event, MessageChannel eventChannel) {
         var msg = "**All Stickers:**\n";
         var stickerList = Main.registeredStickers.values();
+        // ---------------
+        // message version
         int i = 1;
         for (Sticker sticker : Main.registeredStickers.values()) {
             msg += "." + sticker.name;
@@ -101,7 +97,10 @@ public class StickerHandler {
             }
             i++;
         }
-
+        msg += "\n";
+        // CommandDistributer.toDelete.add(eventChannel.createMessage(msg).block());
+        // ----------------
+        // embed version
         var firstMsgCol = "";
         var secondMsgCol = "";
         int j = 0;
@@ -111,25 +110,22 @@ public class StickerHandler {
             } else {
                 secondMsgCol += "." + sticker.name + "\n";
             }
-            msg += "\n";
 
             j++;
         }
         ArrayList<String> fields = new ArrayList<>();
         fields.add(firstMsgCol);
         fields.add(secondMsgCol);
-       
-        //embed version
+
         var emb = Globals.createEmbed(eventChannel, Color.RUST, "Stickers", fields);
         CommandDistributer.toDelete.add(emb);
-
-        // message version
-        // CommandDistributer.toDelete.add(eventChannel.createMessage(msg).block());
-
+        // ----------------------------
+        // deletes the '.'
         if (event.getGuildId().isPresent()) {
             CommandDistributer.toDelete.add(event.getMessage());
         }
     }
+
     private static void stickerHelpEvent(MessageCreateEvent event) {
         String mssg = " ---- Sticker ---- ";
         mssg += buildCommandDescription(". ", "Listet alle Sticker");
@@ -148,31 +144,31 @@ public class StickerHandler {
         return "\n" + "`" + command + ":` " + description;
     }
 
-
     public static void addStickerEvent(MessageCreateEvent event, CommandProperties props) {
-        if (Authorizer.getAuthorizationLevel(event, Main.authorizations) >= 1) {
-            if (props.params.size() >= 2) {
-                if (props.params.get(1).startsWith("http")) {
-                    Sticker newSticker = new Sticker(props.params.get(0), props.params.get(1));
-                    var succsses = addSticker(newSticker);
-
-                    if (succsses) {
-                        props.eventChannel.createMessage("Adding Sticker: " + event.getMember().get().getUsername()
-                                + "\nname: " + props.params.get(0) + "\nurl: " + props.params.get(1)).block();
-                        // eventChannel.createMessage("Please confirm with **" + Main.prefix+ "confirm
-                        // **").block();
-
-                    } else {
-                        props.eventChannel.createMessage("Failed!").block();
-                    }
-                } else {
-                    Globals.createEmbed(props.eventChannel, Color.RED, "", "Unsuccsessful: No link detected!");
-                }
-            } else {
-                Globals.createEmbed(props.eventChannel, Color.RED, "", "Unsuccsessful: Wrong Syntax");
-            }
-        } else {
+        if (!(Authorizer.getAuthorizationLevel(event, Main.authorizations) >= 1)) {
             Globals.createEmbed(props.eventChannel, Color.RED, "", "You are not authorized to use this Command");
+            return;
+        }
+        if (!(props.params.size() >= 2)) {
+            Globals.createEmbed(props.eventChannel, Color.RED, "", "Unsuccsessful: Wrong Syntax");
+            return;
+        }
+        if (props.params.get(1).startsWith("http")) {
+            Globals.createEmbed(props.eventChannel, Color.RED, "", "Unsuccsessful: No link detected!");
+            return;
+        }
+        
+        Sticker newSticker = new Sticker(props.params.get(0), props.params.get(1));
+        var succsses = addSticker(newSticker);
+
+        if (succsses) {
+            props.eventChannel.createMessage("Adding Sticker: " + event.getMember().get().getUsername()
+                    + "\nname: " + props.params.get(0) + "\nurl: " + props.params.get(1)).block();
+            // eventChannel.createMessage("Please confirm with **" + Main.prefix+ "confirm
+            // **").block();
+
+        } else {
+            props.eventChannel.createMessage("Failed!").block();
         }
 
     }
