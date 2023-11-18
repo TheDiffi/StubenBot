@@ -34,8 +34,8 @@ public class Main {
         bootup();
 
         // loads the Bot api
-        //Dev2 token: ODI3NjEyODE1OTU4NjA1ODM0.YGdkfw.Rx95HYsyxiYVnRlHMCdrqP_h9RE
-        client = DiscordClientBuilder.create("NzgzNzg2NzU4MzgyMTU3ODQ1.X8f0TQ.0Vp1AkN0MKJxH0JoTJS335o3fjs")
+        //Token in the .env file
+        client = DiscordClientBuilder.create("")
             .build()
             .login()
             .block();
