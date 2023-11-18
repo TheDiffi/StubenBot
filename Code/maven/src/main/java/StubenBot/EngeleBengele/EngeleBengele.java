@@ -1,6 +1,5 @@
 package StubenBot.EngeleBengele;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -17,16 +16,21 @@ public class EngeleBengele {
     public static HashMap<Snowflake, EBPlayer> mapJoined = new HashMap<>();
 
     public static void handleCommand(MessageCreateEvent event, CommandProperties props) {
-  
-        //sets the command correctly
+
+        // sets the command correctly
         props.command = props.params.remove(0);
 
-
-        if(props.command.equalsIgnoreCase("commands") || props.command.equalsIgnoreCase("help")){
+        if (props.command.equalsIgnoreCase("commands") || props.command.equalsIgnoreCase("help")) {
             var mssg = "\n ---- Engele Bengele ---- ";
             mssg += CommandDistributer.buildCommandDescription(Main.prefix, "EB join <name>", "Trete dem Spiel bei");
-            mssg += CommandDistributer.buildCommandDescription(Main.prefix, "EB remove <name>", "Entferne einen Spieler");
-            mssg += CommandDistributer.buildCommandDescription(Main.prefix, "EB start", "Starte die zufällige Verteilung!");
+            mssg += CommandDistributer.buildCommandDescription(Main.prefix, "EB remove <name>",
+                    "Entferne einen Spieler");
+            mssg += CommandDistributer.buildCommandDescription(Main.prefix, "EB start",
+                    "Starte die zufällige Verteilung!");
+            mssg += CommandDistributer.buildCommandDescription(Main.prefix, "EB list",
+                    "Zähle beigetretene Spieler auf");
+            mssg += CommandDistributer.buildCommandDescription(Main.prefix, "EB reset",
+                    "Lösche alle beigetretene Spieler");
 
             Globals.createEmbed(props.eventChannel, Color.BLACK, "", mssg);
         }
@@ -63,6 +67,8 @@ public class EngeleBengele {
 
         if (props.command.equalsIgnoreCase("reset")) {
             reset(event, mapJoined);
+            props.eventChannel.createMessage("Reset Players").block();
+
         }
 
         if (props.command.equalsIgnoreCase("list")) {

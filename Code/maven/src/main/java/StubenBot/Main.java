@@ -35,8 +35,7 @@ public class Main {
 
         // loads the Bot api
         //Dev2 token: ODI3NjEyODE1OTU4NjA1ODM0.YGdkfw.Rx95HYsyxiYVnRlHMCdrqP_h9RE
-        //original token: ODI3NjEyODE1OTU4NjA1ODM0.YGdkfw.dv70gGT7a9EBbnEKY8bUMJTS2Lk
-        client = DiscordClientBuilder.create("ODI3NjEyODE1OTU4NjA1ODM0.YGdkfw.Rx95HYsyxiYVnRlHMCdrqP_h9RE")
+        client = DiscordClientBuilder.create("NzgzNzg2NzU4MzgyMTU3ODQ1.X8f0TQ.0Vp1AkN0MKJxH0JoTJS335o3fjs")
             .build()
             .login()
             .block();
@@ -103,5 +102,6 @@ public class Main {
         
     }
 
-
 }
+
+ 

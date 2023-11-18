@@ -51,7 +51,7 @@ public class Pollinator {
             .subscribe(
                 evt -> {
                     try {
-                        upddatePoll(evt, embed);
+                        updatePoll(evt, embed);
                     } catch (Exception e) {
                         System.out.println("error: " + e);
                     }
@@ -65,7 +65,7 @@ public class Pollinator {
 /*      this function updates the poll and writes the percentage beside it
         somehow it gets slower the more options are in the poll because i have to 
         loop and get the number for all reactions twice. */
-        private static void upddatePoll(ReactionAddEvent evt, Message embed){
+        private static void updatePoll(ReactionAddEvent evt, Message embed){
             ReactionEmoji reactem = evt.getEmoji();
             boolean auth = evt.getUser().block().isBot();
             double allReactions = 0;

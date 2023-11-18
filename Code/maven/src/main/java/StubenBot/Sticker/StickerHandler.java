@@ -1,6 +1,7 @@
 package StubenBot.Sticker;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
@@ -157,7 +158,7 @@ public class StickerHandler {
             Globals.createEmbed(props.eventChannel, Color.RED, "", "Unsuccsessful: No link detected!");
             return;
         }
-        
+
         Sticker newSticker = new Sticker(props.params.get(0), props.params.get(1));
         var succsses = addSticker(newSticker);
 
@@ -306,10 +307,41 @@ public class StickerHandler {
             // close reader
             reader.close();
 
+        } catch (IOException ex) {
+            System.out.println("No File found, creating stickers.json...");
+            createFile(stickerJsonFilepath);
+            try {
+                JsonArray stickerArray = new JsonArray();
+                BufferedWriter writer = Files.newBufferedWriter(Paths.get(stickerJsonFilepath));
+                JsonObject stickerObject = new JsonObject();
+                stickerObject.put("sticker", stickerArray);
+                Jsoner.serialize(stickerObject, writer);
+                writer.close();
+                System.out.println("Retrying...");
+                reloadStickers();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
         } catch (Exception ex) {
             ex.printStackTrace();
+
         }
 
+    }
+
+    public static void createFile(String filepath) {
+        try {
+            File myObj = new File(filepath);
+            if (myObj.createNewFile()) {
+                System.out.println("File created: " + myObj.getName());
+            } else {
+                System.out.println("File already exists.");
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
     }
 
     private static void backupStickers(JsonObject stickers) {
