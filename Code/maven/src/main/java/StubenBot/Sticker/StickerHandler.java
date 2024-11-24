@@ -131,6 +131,9 @@ public class StickerHandler {
         String mssg = " ---- Sticker ---- ";
         mssg += buildCommandDescription(". ", "Listet alle Sticker");
         mssg += buildCommandDescription(".<stickername>", "Sendet jenen Sticker");
+        mssg += " \n---- LVL1 ---- ";
+        mssg += buildCommandDescription("%addSticker <name> <url>", "add a Sticker to the Collection");
+        mssg += buildCommandDescription("%removeSticker <name>", "remove a Sticker from the Collection");
 
         // so it deletes after
         CommandDistributer.toDelete

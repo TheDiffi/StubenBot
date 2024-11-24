@@ -25,7 +25,7 @@ public class SportTracker {
             Globals.createEmbed(props.eventChannel, Color.BLACK, "", mssg);
 
         }
-        if (props.command.contains("did")) {
+        if (props.content.contains("did") || props.content.contains("sport")) {
             props.eventChannel.createEmbed(
                     a -> a.setImage("http://theoldreader.com/kittens/" + randAspect() + "/"
                             + randAspect() + "/").setTitle("Good Job! Have A Kitten"))
