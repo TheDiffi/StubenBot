@@ -4,17 +4,14 @@ import java.util.ArrayList;
 
 import StubenBot.Authorization.Authorizer;
 import StubenBot.Commands.Memes;
-import StubenBot.Authorization.AuthID;
 import StubenBot.EngeleBengele.EngeleBengele;
 import StubenBot.Polls.Pollinator;
 import StubenBot.SportTracker.SportTracker;
 import StubenBot.Sticker.StickerHandler;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.rest.util.Color;
-import StubenBot.Main;
 
 public class CommandDistributer {
 
@@ -190,7 +187,15 @@ public class CommandDistributer {
     }
 
     public static String buildCommandDescription(String pref, String command, String description) {
-        return "\n" + "`" + pref + command + " :` " + description;
+        return "\n" + "`" + pref + command + "` : " + description;
+    }
+
+    public static String buildMultipleCommandsDescription(String[] prefs, String[] commands, String[] descriptions) {
+        String desc = "";
+        for (int i = 0; i < prefs.length; i++) {
+            desc += buildCommandDescription(prefs[i], commands[i], descriptions[i]);
+        }
+        return desc;
     }
 
     // toggles global russian grammar

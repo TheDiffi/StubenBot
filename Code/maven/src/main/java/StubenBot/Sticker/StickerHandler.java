@@ -154,7 +154,7 @@ public class StickerHandler {
             Globals.createEmbed(props.eventChannel, Color.RED, "", "Unsuccsessful: Wrong Syntax");
             return;
         }
-        if (props.params.get(1).startsWith("http")) {
+        if (!(props.params.get(1).startsWith("http"))) {
             Globals.createEmbed(props.eventChannel, Color.RED, "", "Unsuccsessful: No link detected!");
             return;
         }

@@ -14,27 +14,20 @@ import discord4j.rest.util.Color;
 
 public class EngeleBengele {
     public static HashMap<Snowflake, EBPlayer> mapJoined = new HashMap<>();
+    public static String prefix = Main.prefix + "EB";
 
     public static void handleCommand(MessageCreateEvent event, CommandProperties props) {
 
         // sets the command correctly
         props.command = props.params.remove(0);
+        var commandType = props.command.toLowerCase();
 
-        if (props.command.equalsIgnoreCase("commands") || props.command.equalsIgnoreCase("help")) {
-            var mssg = "\n ---- Engele Bengele ---- ";
-            mssg += CommandDistributer.buildCommandDescription(Main.prefix, "EB join <name>", "Trete dem Spiel bei");
-            mssg += CommandDistributer.buildCommandDescription(Main.prefix, "EB remove <name>",
-                    "Entferne einen Spieler");
-            mssg += CommandDistributer.buildCommandDescription(Main.prefix, "EB start",
-                    "Starte die zufällige Verteilung!");
-            mssg += CommandDistributer.buildCommandDescription(Main.prefix, "EB list",
-                    "Zähle beigetretene Spieler auf");
-            mssg += CommandDistributer.buildCommandDescription(Main.prefix, "EB reset",
-                    "Lösche alle beigetretene Spieler");
+        if (commandType.equals("commands") || commandType.equals("help")) {
+            String helpMessage = buildHelpMessage(props);
+            Globals.createEmbed(props.eventChannel, Color.BLACK, "", helpMessage);
 
-            Globals.createEmbed(props.eventChannel, Color.BLACK, "", mssg);
         }
-        if (props.command.equalsIgnoreCase("join")) {
+        if (commandType.equals("join")) {
             // gets the name
             var name = "";
 
@@ -54,9 +47,12 @@ public class EngeleBengele {
             }
             props.eventChannel.createMessage("You're in!").block();
 
+            var concatenatedNames = mapJoined.values().stream().map(a -> a.name).reduce("", (a, b) -> a + "\n" + b);
+            props.eventChannel.createMessage("Currently joined: " + mapJoined.size() + concatenatedNames).block();
+
         }
 
-        if (props.command.equalsIgnoreCase("start")) {
+        if (commandType.equals("start")) {
             boolean a = false;
             while (!a) {
                 // assignes bengeles & sends messages
@@ -65,13 +61,13 @@ public class EngeleBengele {
             props.eventChannel.createMessage("DONE!").block();
         }
 
-        if (props.command.equalsIgnoreCase("reset")) {
+        if (commandType.equals("reset")) {
             reset(event, mapJoined);
             props.eventChannel.createMessage("Reset Players").block();
 
         }
 
-        if (props.command.equalsIgnoreCase("list")) {
+        if (commandType.equals("list")) {
             var mssg = "";
             for (var player : mapJoined.values()) {
                 mssg += "\n" + player.name;
@@ -79,7 +75,7 @@ public class EngeleBengele {
             props.eventChannel.createMessage("Joined: " + mapJoined.size() + mssg).block();
         }
 
-        if (props.command.equalsIgnoreCase("remove")) {
+        if (commandType.equals("remove")) {
             // gets the name
             var name = "";
             for (String string : props.params) {
@@ -99,6 +95,20 @@ public class EngeleBengele {
             }
 
         }
+    }
+
+    private static String buildHelpMessage(CommandProperties props) {
+        var title = "\n ---- Engele Bengele ---- ";
+        var commands = new String[3][5];
+        commands[0] = new String[] { prefix, prefix, prefix, prefix, prefix, prefix };
+        commands[1] = new String[] { "join", "remove", "start", "list", "reset" };
+        commands[2] = new String[] { "Trete dem Spiel bei", "Entferne einen Spieler",
+                "Starte die zufällige Verteilung!",
+                "Zähle beigetretene Spieler auf", "Lösche alle beigetretene Spieler" };
+
+        var description = CommandDistributer.buildMultipleCommandsDescription(commands[0], commands[1], commands[2]);
+
+        return title + description;
     }
 
     private static boolean setBengeles(HashMap<Snowflake, EBPlayer> mapJoined) {
